@@ -1,0 +1,13 @@
+/build/
+/.gradle/
+/.kotlin/
+node_modules/
+.idea/
+*.iml
+__pycache__/
+*.pyc
+**/build/
+**/.gradle/
+**/.kotlin/
+**/dist/
+**/local.properties

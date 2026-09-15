@@ -1,0 +1,15 @@
+{
+  "name": "engine-web-verification",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --noEmit && vite build"
+  },
+  "dependencies": {
+    "khmer-calendar-engine": "file:../../build/npm"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "vite": "6.4.3"
+  }
+}

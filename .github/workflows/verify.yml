@@ -1,0 +1,52 @@
+name: Verify engine
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  engine-and-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+          cache: npm
+          cache-dependency-path: |
+            kotlin-js-store/package-lock.json
+            verification/web/package-lock.json
+      - name: Test both targets and build artifacts
+        run: bash ./gradlew check jvmJar publishAllPublicationsToLocalBuildRepository --no-daemon
+      - name: Pack the JavaScript library
+        run: npm pack ./build/npm --pack-destination ./build
+      - name: Install web verification dependencies
+        working-directory: verification/web
+        run: npm ci
+      - name: Consume the packed library
+        working-directory: verification/web
+        run: npm install --no-save --package-lock=false ../../build/khmer-calendar-engine-0.1.0.tgz
+      - name: Check TypeScript and build the browser bundle
+        working-directory: verification/web
+        run: npm run build
+      - name: Run the browser consumer
+        run: python3 tools/verify_browser.py --browser google-chrome
+      - uses: actions/upload-artifact@v7
+        with:
+          name: engine-artifacts
+          path: |
+            build/libs/*-jvm-*.jar
+            build/khmer-calendar-engine-*.tgz
+            build/repository
+            build/reports/tests
+            build/reports/browser-verification.json
+          if-no-files-found: error
