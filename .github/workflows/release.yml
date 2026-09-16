@@ -1,0 +1,63 @@
+name: Release engine
+
+on:
+  push:
+    tags: ['v*']
+  # Select an existing version tag when running manually.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: engine-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    uses: ./.github/workflows/verify.yml
+    with:
+      release: true
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: release-assets
+          path: release
+      - name: Verify downloaded package checksums
+        working-directory: release
+        run: sha256sum --check SHA256SUMS
+      - name: Publish the tested packages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+          ENGINE_VERSION: ${{ needs.verify.outputs.version }}
+          SOURCE_COMMIT: ${{ needs.verify.outputs.commit }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_commit="$(gh api "repos/$GH_REPO/commits/$RELEASE_TAG" --jq .sha)"
+          if [[ "$remote_commit" != "$SOURCE_COMMIT" ]]; then
+            echo "The release tag moved after verification; refusing to publish."
+            exit 1
+          fi
+          options=()
+          if [[ "$ENGINE_VERSION" == *-* ]]; then
+            options+=(--prerelease --latest=false)
+          fi
+          gh release create "$RELEASE_TAG" \
+            "release/khmer-calendar-engine-$ENGINE_VERSION.tgz" \
+            "release/khmer-calendar-engine-jvm-$ENGINE_VERSION.jar" \
+            "release/khmer-calendar-engine-maven-$ENGINE_VERSION.zip" \
+            release/SHA256SUMS \
+            --verify-tag \
+            --title "Khmer Calendar Engine $RELEASE_TAG" \
+            --notes-file release/RELEASE_NOTES.md \
+            "${options[@]}"

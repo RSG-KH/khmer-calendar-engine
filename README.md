@@ -4,7 +4,7 @@ One Kotlin implementation, compiled into an **Android-compatible JVM library** a
 
 ## Status
 
-**0.1.0 — initial implementation, available as local build artifacts.** It is not published to Maven Central or npm. The existing consumer applications have not yet been migrated.
+**0.1.0 — initial implementation.** Packages can be built locally; the [release workflow](docs/releasing.md) publishes tested packages to GitHub when a matching version tag is pushed. It does not publish to Maven Central or npm. The existing Android and PWA applications have not yet been migrated.
 
 Implemented:
 
@@ -20,7 +20,7 @@ The engine calculates dates. The separate manager will maintain event definition
 
 ### Android / Kotlin
 
-Add the built Maven repository (`build/repository`) to your project's repositories, then depend on:
+Add the built Maven repository (`build/repository`), or the extracted `repository/` directory from a published Maven ZIP, to your project's repositories, then depend on:
 
 ```kotlin
 implementation("com.rsgkh:khmer-calendar-engine-jvm:0.1.0")
@@ -42,7 +42,7 @@ val occurrences = engine.evaluateRule(2026, lent) // July 30, second Asadh
 
 ### JavaScript / PWA
 
-Install the locally built tarball with `npm install <path-to-tarball>`:
+Install the locally built tarball with `npm install <path-to-tarball>`, or install a published release's versioned `.tgz` URL as described in [release installation](docs/releasing.md#install-a-published-release):
 
 ```typescript
 import { KhmerCalendarEngine, createRule } from 'khmer-calendar-engine';
