@@ -8,6 +8,7 @@ public class EngineConsumerTest {
     @Test public void consumesThePublishedJvmApi() {
         KhmerCalendarEngine engine = new KhmerCalendarEngine();
         assertEquals("2012-04-13", EngineConsumer.newYear2012());
+        assertEquals("2012-04-13", KotlinEngineConsumer.newYear2012());
         LunarDate lunar = engine.fromGregorian(2026, 7, 30).getLunar();
         assertEquals(13, lunar.getMonth());
         assertEquals("2026-07-30", engine.toGregorian(lunar.getBuddhistYear(), lunar.getMonth(), lunar.getDay(), lunar.getWaxing()).getIso());

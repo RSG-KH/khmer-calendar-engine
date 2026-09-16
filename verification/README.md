@@ -4,13 +4,13 @@ These small projects consume the built artifacts without modifying production ap
 
 ## Android
 
-First run the engine's `publishAllPublicationsToLocalBuildRepository` task. The fixture requires Android SDK 37 and an AGP 9.4-compatible Gradle/JDK installation (verified with Gradle 9.6 and JDK 25). Set `ANDROID_HOME` to your SDK location or create an ignored `android/local.properties`.
+First run the engine's `publishAllPublicationsToLocalBuildRepository` task. The fixture requires Android SDK 37 and uses AGP 9.4 with the engine's Gradle 9.6 wrapper and JDK 25. Set `ANDROID_HOME` to your SDK location or create an ignored `android/local.properties`.
 
 ```text
-gradle -p verification/android testDebugUnitTest assembleDebug
+bash ./gradlew -p verification/android testDebugUnitTest assembleDebug
 ```
 
-The unit test calls the JVM artifact from Java. APK assembly also runs Android's DEX conversion. This verifies library consumption and packaging; it is not an emulator or device test. The verification APK has no activity and is not intended for installation.
+Run the command from the repository root (`gradlew.bat` on Windows). The unit test calls the JVM artifact from Java and through a Kotlin consumer, checking Kotlin metadata compatibility as well as runtime behavior. APK assembly also runs Android's DEX conversion. This verifies library consumption and packaging; it is not an emulator or device test. The verification APK has no activity and is not intended for installation.
 
 ## Web / PWA
 

@@ -1,14 +1,21 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 
 plugins {
-    kotlin("multiplatform") version "2.2.10"
+    kotlin("multiplatform") version "2.4.20"
     `maven-publish`
 }
 
 group = "com.rsgkh"
 version = "0.1.0"
+
+// Developers install JDK 25 locally; CI provisions it with setup-java.
+tasks.named<UpdateDaemonJvm>("updateDaemonJvm") {
+    languageVersion.set(JavaLanguageVersion.of(25))
+    toolchainDownloadUrls.empty()
+}
 
 // Use the developer/CI Node installation; runtime consumers need no Gradle or Kotlin tools.
 rootProject.plugins.withType<NodeJsRootPlugin> {
@@ -16,6 +23,12 @@ rootProject.plugins.withType<NodeJsRootPlugin> {
 }
 
 kotlin {
+    jvmToolchain(25)
+    // Keep published metadata and APIs readable by Kotlin 2.2 Android consumers.
+    compilerOptions {
+        languageVersion.set(KotlinVersion.KOTLIN_2_2)
+        apiVersion.set(KotlinVersion.KOTLIN_2_2)
+    }
     jvm {
         compilerOptions { jvmTarget.set(JvmTarget.JVM_11) }
         testRuns["test"].executionTask.configure {
@@ -24,7 +37,7 @@ kotlin {
             outputs.file(baseline)
         }
     }
-    js(IR) {
+    js {
         outputModuleName = "khmer-calendar-engine"
         useEsModules()
         nodejs { testTask { useMocha { timeout = "120s" } } }
@@ -32,6 +45,7 @@ kotlin {
         generateTypeScriptDefinitions()
     }
     sourceSets {
+        commonMain.dependencies { api(kotlin("stdlib", "2.2.10")) }
         commonTest.dependencies { implementation(kotlin("test")) }
     }
 }
@@ -59,7 +73,7 @@ tasks.withType<Jar>().configureEach {
     from(listOf("LICENSE", "NOTICE")) { into("META-INF") }
 }
 
-val packageJs by tasks.registering(Exec::class) {
+val packageJs = tasks.register<Exec>("packageJs") {
     dependsOn("jsNodeProductionLibraryDistribution")
     inputs.dir("js")
     inputs.dir("docs")
@@ -71,7 +85,7 @@ val packageJs by tasks.registering(Exec::class) {
     commandLine("node", "tools/package-js.mjs")
 }
 
-val verifyJs by tasks.registering(Exec::class) {
+val verifyJs = tasks.register<Exec>("verifyJs") {
     dependsOn("jvmTest", packageJs)
     commandLine("node", "tools/verify-js.mjs")
 }

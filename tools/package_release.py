@@ -91,7 +91,7 @@ def stage(root: Path, version: str) -> Path:
 | `khmer-calendar-engine-jvm-{version}.jar` | Android-compatible JVM library; dependency metadata is in the Maven archive |
 | `SHA256SUMS` | SHA-256 hashes of the three packages |
 
-The release workflow runs JVM and JavaScript tests, cross-target parity checks, and the TypeScript/Vite/headless-browser consumer before publishing.
+The release workflow runs JVM and JavaScript tests, cross-target parity checks, the TypeScript/Vite/headless-browser consumer, and Android Java/Kotlin consumer tests with APK assembly before publishing.
 
 Calculations run offline. Event catalogs and government holiday lists are maintained separately. The supported range is 1800–2200; independent historical validation remains incomplete, including 1879/1897. Precise New Year arrival times are not exposed. See the tagged source's README and docs/references.md for evidence and limitations.
 """, encoding="utf-8", newline="\n")

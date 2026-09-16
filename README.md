@@ -63,7 +63,7 @@ const occurrences = engine.evaluateRule(2026, lent);
 
 ## Build and test
 
-Requirements: **JDK 17 recommended** (JDK 11 also tested), Node.js on `PATH`, and internet access for the first dependency download. Gradle 8.14.3 and Kotlin 2.2.10 are pinned. Do not run this Gradle wrapper with JDK 25. Node 26 was used for the recorded verification.
+Requirements: **JDK 25**, Node.js on `PATH`, and internet access for the first dependency download. Gradle 9.6.0 and Kotlin 2.4.20 are pinned. The Gradle daemon and JVM toolchain select an installed JDK 25; point `JAVA_HOME` to that installation if needed. GitHub Actions provisions Zulu JDK 25. Node 26 was used for the recorded verification.
 
 From this repository (`gradlew.bat` on Windows):
 
@@ -81,7 +81,9 @@ Outputs:
 | ESM package and TypeScript declarations | `build/npm` |
 | Installable npm tarball | `build/khmer-calendar-engine-0.1.0.tgz` |
 
-The JVM artifact targets Java 11 bytecode. Use Maven metadata to obtain its Kotlin standard-library dependency. The JavaScript package includes its compiled runtime; consumers do not need Kotlin or Java. Both artifacts include license notices.
+JDK 25 runs the build; the JVM artifact still targets Java 11 bytecode. Use Maven metadata to obtain its Kotlin standard-library dependency. The JavaScript package includes its compiled runtime; consumers do not need Kotlin or Java. Both artifacts include license notices.
+
+The Kotlin compiler/plugin is 2.4.20, while the library's language/API level and metadata remain Kotlin 2.2 and its standard library stays at 2.2.10. This lets existing Kotlin 2.2 Android consumers use the engine without upgrading their compiler. The Android fixture verifies both Java and Kotlin callers.
 
 ## Verification and accuracy
 

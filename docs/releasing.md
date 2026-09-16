@@ -26,7 +26,7 @@ The workflow uses GitHub's built-in `GITHUB_TOKEN`. Only the publishing job rece
 | `khmer-calendar-engine-maven-VERSION.zip` | Maven repository for this version, including JVM/JS/multiplatform artifacts, dependency metadata, source archives and license notices. Use this for Gradle dependency resolution. |
 | `SHA256SUMS` | SHA-256 hashes of the three packages. |
 
-The workflow checks JVM and JavaScript tests, cross-target parity, and the TypeScript/Vite/headless-browser consumer. It does not run the separate Android SDK consumer fixture on GitHub; that fixture's local verification is documented in [consumer verification](../verification/README.md).
+The workflow checks JVM and JavaScript tests, cross-target parity, the TypeScript/Vite/headless-browser consumer, and Android Java/Kotlin consumption with unit tests and APK assembly. It uses JDK 25 and the Android SDK on the GitHub-hosted Ubuntu runner. Local commands are documented in [consumer verification](../verification/README.md).
 
 Assets are also available as the **release-assets** Actions artifact after a successful verification run. Release archives are staged locally under `build/release/VERSION/`.
 
