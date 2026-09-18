@@ -6,6 +6,7 @@ import kotlin.js.JsExport
 
 /** Data-driven rule; contains no event labels or implied public-holiday classification.
  * For lunar rules [monthPolicy] is "exact" or "ordinary_or_second_asadh".
+ * For Chinese festival rules [monthPolicy] can be "cn-reference-utc8" or "archive-v1".
  * For weekday rules [day] is ISO weekday and [occurrence] is 1..5. */
 @JsExport
 class RecurrenceRule(
@@ -28,8 +29,8 @@ class RecurrenceRule(
         requireCalendarYear(throughYear)
         require(fromYear <= throughYear) { "Invalid effective-year range" }
         require(offset in -366..366 && duration in 1..366) { "Invalid offset or duration" }
-        require(monthPolicy in setOf("exact", "ordinary_or_second_asadh")) { "Unknown lunar month policy" }
-        require(monthPolicy == "exact" || (type == "khmer_lunar" && month == 7)) { "Second-Asadh policy requires an Asadh lunar rule" }
+        require(monthPolicy in setOf("exact", "ordinary_or_second_asadh", "cn-reference-utc8", "archive-v1")) { "Unknown lunar month or festival policy" }
+        require(monthPolicy != "ordinary_or_second_asadh" || (type == "khmer_lunar" && month == 7)) { "Second-Asadh policy requires an Asadh lunar rule" }
         when (type) {
             "solar" -> {
                 require(month in 1..12 && day in 1..daysInMonth(2000, month)) { "Invalid fixed Gregorian date" }
@@ -44,6 +45,10 @@ class RecurrenceRule(
             }
             "new_year_first", "new_year_middle", "new_year_last" ->
                 require(month == 1 && day == 1 && waxing && occurrence == 1) { "New Year stages do not take month/day parameters" }
+            "chinese_festival" -> {
+                require(id in ChineseLunisolarEngine.FESTIVAL_IDS) { "Unknown Chinese festival ID: $id" }
+                require(month == 1 && day == 1 && waxing && occurrence == 1) { "Chinese festival rules do not take month/day parameters" }
+            }
             else -> throw IllegalArgumentException("Unknown recurrence type: $type")
         }
         freezeValue(this)
@@ -105,6 +110,18 @@ internal fun evaluateRecurrence(year: Int, rule: RecurrenceRule, replacement: Ev
         "new_year_first" -> listOf(SolarNewYear.forYear(year).start)
         "new_year_middle" -> SolarNewYear.forYear(year).dates.drop(1).dropLast(1)
         "new_year_last" -> listOf(SolarNewYear.forYear(year).end)
+        "chinese_festival" -> {
+            if (year !in ChineseLunisolarEngine.MIN_YEAR..ChineseLunisolarEngine.MAX_YEAR) {
+                emptyList()
+            } else {
+                val profile = if (rule.monthPolicy == "archive-v1") FestivalProfile.ARCHIVE_V1 else FestivalProfile.CN_REFERENCE_UTC8
+                val chineseEngine = ChineseLunisolarEngine(profile)
+                chineseEngine.getFestivalDates(year, rule.id).map { iso ->
+                    val parts = iso.split("-").map { it.toInt() }
+                    GregorianDate(parts[0], parts[1], parts[2])
+                }.toList()
+            }
+        }
         else -> error("Validated rule type is unsupported")
     }
     return anchors.flatMap { anchor -> (0 until rule.duration).map { anchor.plusDays(rule.offset + it) } }

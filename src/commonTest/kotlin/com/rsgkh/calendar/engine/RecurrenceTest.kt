@@ -70,4 +70,29 @@ class RecurrenceTest {
         assertFailsWith<IllegalArgumentException> { RecurrenceRule("x", "solar", duration = 0) }
         assertFailsWith<IllegalArgumentException> { RecurrenceRule("x", "solar", fromYear = 2100, throughYear = 2000) }
     }
+    @Test fun chineseFestivalRulesEvaluateAccuratelyAcrossProfiles() {
+        val cny = RecurrenceRule("chinese_new_year_days", "chinese_festival")
+        assertEquals(listOf("2026-02-17", "2026-02-18", "2026-02-19"), dates(2026, cny))
+
+        val eve = RecurrenceRule("chinese_new_year_eve", "chinese_festival")
+        assertEquals(listOf("2026-02-16"), dates(2026, eve))
+
+        val kitchen = RecurrenceRule("chinese_kitchen_god_festival", "chinese_festival")
+        assertEquals(listOf("2026-02-11"), dates(2026, kitchen))
+
+        // Profile testing: 2013 Zongzi
+        val zongziUtc8 = RecurrenceRule("chinese_zongzi_festival", "chinese_festival", monthPolicy = "cn-reference-utc8")
+        assertEquals(listOf("2013-06-12"), dates(2013, zongziUtc8))
+
+        val zongziArchive = RecurrenceRule("chinese_zongzi_festival", "chinese_festival", monthPolicy = "archive-v1")
+        assertEquals(listOf("2013-06-13"), dates(2013, zongziArchive))
+
+        // Boundary: outside 1900..2100 returns emptyList
+        assertEquals(emptyList(), dates(1899, cny))
+        assertEquals(emptyList(), dates(2101, cny))
+
+        // Invalid festival ID or parameters
+        assertFailsWith<IllegalArgumentException> { RecurrenceRule("unknown_festival", "chinese_festival") }
+        assertFailsWith<IllegalArgumentException> { RecurrenceRule("chinese_new_year_days", "chinese_festival", month = 2) }
+    }
 }
