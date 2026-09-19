@@ -43,7 +43,8 @@ for (const row of readFileSync(baselinePath, 'utf8').trim().split(/\r?\n/)) {
     days++;
   } else if (fields[0] === 'N') {
     const year = Number(fields[1]), v = engine.newYear(year);
-    assert.equal(['N', year, v.start.iso, v.days].join('\t'), row);
+    assert.equal(['N', year, v.start.iso, v.days, v.arrivalEstimate.minuteOfDay].join('\t'), row);
+    assert.equal(v.arrivalEstimate.minuteOfDay % 24, 0, `${year} arrival estimate lattice`);
     years++;
   } else if (fields[0] === 'R') {
     const key = `${fields[1]}/${fields[2]}`;
@@ -67,6 +68,11 @@ assert.throws(() => new RecurrenceRule('bad', 'solar', 5, 1.5));
 assert.throws(() => createRule({ id: 'bad', type: 'khmer_lunar', month: 7, day: 1, secondAsadh: true }));
 assert.throws(() => createRule({ id: 'bad', type: 'khmer_lunar', month: 7, day: 1, monthPolicy: 'typo' }));
 assert.equal(engine.newYear(2012).start.iso, '2012-04-13');
+// The estimate is a frozen, estimate-typed value; published clocks are not computed here.
+assert.equal(engine.newYear(2012).arrivalEstimate.minuteOfDay, 1152);
+assert.equal(engine.newYear(2012).arrivalEstimate.hour, 19);
+assert.equal(engine.newYear(2025).arrivalEstimate.minuteOfDay, 288);
+assert.throws(() => { engine.newYear(2012).arrivalEstimate.minuteOfDay = 0; }, TypeError);
 
 // A caller must not be able to corrupt shared caches or bypass validated rule inputs.
 assert.throws(() => { engine.newYear(2012).start.day = 14; }, TypeError);

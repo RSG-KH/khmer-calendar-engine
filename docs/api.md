@@ -1,6 +1,6 @@
 # API and calendar conventions
 
-Version **0.1.0** is the initial API. Kotlin and Java use package `com.rsgkh.calendar.engine`; JavaScript uses named exports from `khmer-calendar-engine`. Results contain facts and indices; applications supply translations and display formatting.
+Version **0.3.0** adds the New Year arrival estimate; 0.1.0 established the API and 0.2.0 added recurrence rules and the Chinese lunisolar engine. Kotlin and Java use package `com.rsgkh.calendar.engine`; JavaScript uses named exports from `khmer-calendar-engine`. Results contain facts and indices; applications supply translations and display formatting.
 
 ## Dates
 
@@ -10,7 +10,7 @@ Create one `KhmerCalendarEngine` and reuse it. Its immutable calculation tables 
 | --- | --- |
 | `fromGregorian(year, month, day)` | `CalendarDate`: Gregorian date, lunar date, animal year, Sak and date-level transition flags |
 | `toGregorian(buddhistYear, month, day, waxing)` | The corresponding `GregorianDate`; rejects nonexistent lunar dates |
-| `newYear(year)` | First date, number of days, last date and all festival dates |
+| `newYear(year)` | First date, number of days, last date, all festival dates, and the arrival `ArrivalEstimate` below |
 | `evaluateRule(year, rule, dateOverride?)` | Sorted, unique occurrences for the rule's anchor year |
 
 Engine calculations support Gregorian **1800-01-01 through 2200-12-31**, inclusive. Inputs outside this range throw an argument error. The standalone `GregorianDate` helper supports years 1–9999, validates leap days, and provides `iso`, `epochDay`, ISO `dayOfWeek` (Monday 1, Sunday 7) and `plusDays`.
@@ -37,7 +37,16 @@ The implemented date-label conventions are:
 - Animal year is indexed 0 (Rat) through 11 (Pig), and changes on the first New Year date.
 - Sak is indexed 0 through 9, and changes on the last New Year date.
 
-These are calendar-date labels, not claims about the precise transition instant. Historical validation limits and direct evidence are in [references.md](references.md). No arrival-time API is exposed.
+These are calendar-date labels, not claims about the precise transition instant. Historical validation limits and direct evidence are in [references.md](references.md).
+
+### New Year arrival estimate
+
+`NewYearCelebration.arrivalEstimate` is an `ArrivalEstimate`: the traditional arithmetic's `minuteOfDay` (with `hour`/`minute` views) on the festival's first date. The type name is deliberate — this is an **estimate, never an authority**:
+
+- The traditional conversion multiplies an integer solar arc-minute remainder by 24, so `minuteOfDay` is always a multiple of 24. Published clocks such as 19:11, 08:07 or 14:01 are structurally unreachable by this arithmetic.
+- Reviewed publications and national broadcaster (TVK) archives cover 19 evidenced years (1997, 2009, 2010–2026 unbroken): 12 years match the estimate to the exact minute (0m error: 1997, 2010, 2016–2023, 2025, 2026), while off-lattice years differ by 1–24 minutes. Agreement in some years is not evidence of correctness elsewhere.
+
+There is **no certified arrival-time API**. Published arrival clocks are an annual editorial act by the Ministry of Cults and Religion's almanac; they are maintained per year as source-tagged data by the manager, with evidence grades and dispute states. Applications should present the estimate as a prediction and the graded record — where one exists — as the official time. See references.md for the full findings.
 
 ## Recurrence rules
 

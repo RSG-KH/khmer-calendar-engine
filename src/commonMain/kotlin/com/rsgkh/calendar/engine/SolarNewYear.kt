@@ -23,7 +23,9 @@ internal object SolarNewYear {
         if (a == 137 && avoman(year + 1) == 0) return false
         return a < 138
     }
-    private fun solarDegree(year: Int, sotin: Int): Int {
+    /** Inaugurated solar position at day-count sotin, as within-sign degree and libda
+     * (arc-minute remainder). The upstream quadrant 0..2 branch is preserved. */
+    private fun solarPosition(year: Int, sotin: Int): Pair<Int, Int> {
         val r2 = 800 * sotin + kromthupul(year - 1)
         val average = 1800 * (r2 / 24350) + 60 * (r2 % 24350 / 811) + r2 % 24350 % 811 / 14 - 3
         val left = if (average < 4800) average - 4800 + 21600 else average - 4800
@@ -42,7 +44,7 @@ internal object SolarNewYear {
         val corrections = intArrayOf(0, 35, 67, 94, 116, 129)
         val correction = if (segment <= 5) portion * multipliers[segment] / 900 + corrections[segment] else 134
         val inauguration = if (quadrant <= 5) average - correction else average + correction
-        return inauguration % 1800 / 60
+        return inauguration % 1800 / 60 to inauguration % 60
     }
     private val celebrations by lazy { (MIN_YEAR..MAX_YEAR).map(::calculate) }
     fun forYear(year: Int): NewYearCelebration {
@@ -52,7 +54,13 @@ internal object SolarNewYear {
     private fun calculate(year: Int): NewYearCelebration {
         val jsYear = year - 638
         val firstSotin = if (kromthupul(jsYear - 1) <= 207) 363 else 362
-        val days = if (solarDegree(jsYear, firstSotin) == 0) 4 else 3
+        val candidates = (firstSotin..firstSotin + 3).map { solarPosition(jsYear, it) }
+        val days = if (candidates.first().first == 0) 4 else 3
+        // Arrival estimate: the libda at the first candidate completing the sign, converted
+        // by the traditional one-degree-per-day rule (24 clock minutes per arc minute).
+        // Every supported year yields such a candidate; the estimate's lattice limitation
+        // and its disagreements with published clocks are documented in references.md.
+        val libda = candidates.first { it.first == 0 }.second
         var b = bodithey(jsYear)
         if (leapMonth(jsYear - 1) && leapDay(jsYear - 1)) b = (b + 1) % 30
         val lerngSakMonth = if (b >= 6) 4 else 5
@@ -64,6 +72,6 @@ internal object SolarNewYear {
         // references.md, reviewed 2012 case: the former Apr 14 override contradicted the sources.
         // Other modern upstream date overrides equal the formula, so no date override is applied.
         val start = epoch.plusDays(-(difference + days - 1))
-        return NewYearCelebration(start, days)
+        return NewYearCelebration(start, days, ArrivalEstimate((1440 - libda * 24) % 1440))
     }
 }

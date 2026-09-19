@@ -4,17 +4,18 @@ One Kotlin implementation, compiled into an **Android-compatible JVM library** a
 
 ## Status
 
-**0.1.0 — initial implementation.** Packages can be built locally; the [release workflow](docs/releasing.md) publishes tested packages to GitHub when a matching version tag is pushed. It does not publish to Maven Central or npm. The existing Android and PWA applications have not yet been migrated.
+**0.3.0 — New Year arrival estimate.** Packages can be built locally; the [release workflow](docs/releasing.md) publishes tested packages to GitHub when a matching version tag is pushed. It does not publish to Maven Central or npm.
 
 Implemented:
 
 - Gregorian ↔ Khmer lunar conversion, including leap months and leap days.
 - Buddhist Era, animal-year and Sak labels, holy days and shaving days.
 - Khmer New Year dates and festival duration, including the corrected **13–15 April 2012** result.
+- The traditional arithmetic's **arrival-time estimate** (`arrivalEstimate`) — estimate-typed, minute precision, documented as never authoritative; published clocks are per-year data maintained by the manager.
 - Fixed-date, weekday, lunar and New Year recurrence rules; ordinary/second-Asadh selection.
 - Source-backed event date replacements and cancellations.
 
-The engine calculates dates. The separate manager will maintain event definitions, translations, historical records and government yearly holiday publications, with developer imports and versioned exports. Calculating a traditional festival does not establish official leave.
+The engine calculates dates and one clearly-labeled estimate. The separate manager maintains event definitions, translations, historical records, government yearly holiday publications and the source-tagged arrival-time dataset, with developer imports and versioned exports. Calculating a traditional festival does not establish official leave.
 
 ## Use it
 
@@ -23,7 +24,7 @@ The engine calculates dates. The separate manager will maintain event definition
 Add the built Maven repository (`build/repository`), or the extracted `repository/` directory from a published Maven ZIP, to your project's repositories, then depend on:
 
 ```kotlin
-implementation("com.rsgkh:khmer-calendar-engine-jvm:0.1.0")
+implementation("com.rsgkh:khmer-calendar-engine-jvm:0.3.0")
 ```
 
 ```kotlin
@@ -76,10 +77,10 @@ Outputs:
 
 | Artifact | Location |
 | --- | --- |
-| JVM library | `build/libs/khmer-calendar-engine-jvm-0.1.0.jar` |
+| JVM library | `build/libs/khmer-calendar-engine-jvm-0.3.0.jar` |
 | Maven repository, including dependency metadata | `build/repository` |
 | ESM package and TypeScript declarations | `build/npm` |
-| Installable npm tarball | `build/khmer-calendar-engine-0.1.0.tgz` |
+| Installable npm tarball | `build/khmer-calendar-engine-0.3.0.tgz` |
 
 JDK 25 runs the build; the JVM artifact still targets Java 11 bytecode. Use Maven metadata to obtain its Kotlin standard-library dependency. The JavaScript package includes its compiled runtime; consumers do not need Kotlin or Java. Both artifacts include license notices.
 
@@ -87,15 +88,15 @@ The Kotlin compiler/plugin is 2.4.20, while the library's language/API level and
 
 ## Verification and accuracy
 
-Recorded **16 September 2026**:
+Recorded **19 September 2026**:
 
-- **14 JVM tests and 12 JavaScript tests pass**, including every supported date's Gregorian/lunar round trip and calendar boundary checks.
-- Compiled JVM and packaged JavaScript agree on **146,462 dates**, **401 New Year results** and **2,474 occurrences** across all six recurrence families.
+- **22 JVM tests and 20 JavaScript tests pass**, including every supported date's Gregorian/lunar round trip and calendar boundary checks.
+- Compiled JVM and packaged JavaScript agree on **146,462 dates**, **401 New Year results with arrival estimates** and **2,474 occurrences** across all six recurrence families; every estimate sits on the 24-minute lattice.
 - Lunar hashes match the pinned MomentKH compatibility fixture for **1900–2100**. Its incorrect 2012 New Year date is explicitly rejected by the regression test.
 - Reviewed modern New Year dates and published lunar-festival anchors pass focused tests.
 - The Maven artifact passes an Android consumer test and APK/DEX assembly. The npm package passes strict TypeScript, Vite production compilation and execution in headless Chrome. See [consumer verification](verification/README.md).
 
-The computational range is **1800–2200**, not a claim that every historical date has independent confirmation. [Calendar evidence and references](docs/references.md) records direct publications, reviewed observations and open questions. **1879/1897 remain historically unresolved; precise arrival times are not exposed.** Broader independent checks of leap boundaries, holy days and year transitions remain necessary before claiming authoritative coverage of the entire range.
+The computational range is **1800–2200**, not a claim that every historical date has independent confirmation. [Calendar evidence and references](docs/references.md) records direct publications, reviewed observations and open questions. **1879/1897 remain historically unresolved; precise arrival times are not computed — the estimate lies on a 24-minute lattice and published clocks are carried as per-year sourced data.** Broader independent checks of leap boundaries, holy days and year transitions remain necessary before claiming authoritative coverage of the entire range.
 
 The [legacy implementation comparison](docs/source-audit.md) is a development audit, separate from calendar evidence. Consumer migration should preserve explicitly dated events and official holiday records while replacing embedded calculations.
 

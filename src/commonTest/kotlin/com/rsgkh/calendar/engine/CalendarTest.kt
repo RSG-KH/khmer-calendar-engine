@@ -56,7 +56,8 @@ class CalendarTest {
 
     @Test fun reviewedFestivalDateCases() {
         // Direct sources and review limits: docs/references.md, T06/N01..N10/G01/G04/G05.
-        // Arrival-minute observations are intentionally not tested as a calculated-time API.
+        // Published arrival minutes are tested as dataset evidence in the manager, never
+        // as expected output of the estimate calculation below.
         val starts = mapOf(2011 to 14, 2012 to 13, 2013 to 14, 2014 to 14, 2015 to 14,
             2024 to 13, 2025 to 14, 2026 to 14)
         for ((year, day) in starts) {
@@ -66,6 +67,33 @@ class CalendarTest {
         }
         assertEquals(listOf("2012-04-13", "2012-04-14", "2012-04-15"), engine.newYear(2012).dates.map { it.iso })
         assertEquals(listOf("2024-04-13", "2024-04-14", "2024-04-15", "2024-04-16"), engine.newYear(2024).dates.map { it.iso })
+    }
+
+    @Test fun arrivalEstimateReproducesTheTraditionalTimePath() {
+        // Diagnostic reconstruction of the pinned MomentKH arithmetic (research time path,
+        // docs/references.md). These are computed minutes, not published arrival clocks:
+        // 2011–2015 and 2024 disagree with the reviewed publications by 1–24 minutes.
+        val expected = mapOf(
+            2011 to 816, 2012 to 1152, 2013 to 144, 2014 to 504, 2015 to 864,
+            2024 to 1344, 2025 to 288, 2026 to 648)
+        for ((year, minuteOfDay) in expected) {
+            assertEquals(minuteOfDay, engine.newYear(year).arrivalEstimate.minuteOfDay, "$year")
+        }
+        val estimate = engine.newYear(2012).arrivalEstimate
+        assertEquals(19, estimate.hour)
+        assertEquals(12, estimate.minute)
+    }
+
+    @Test fun arrivalEstimateStaysOnThe24MinuteLatticeForEverySupportedYear() {
+        // Structural limitation of the traditional conversion: minuteOfDay is always a
+        // multiple of 24, so published clocks such as 19:11 or 08:07 are unreachable.
+        for (year in 1800..2200) {
+            val estimate = engine.newYear(year).arrivalEstimate
+            assertEquals(0, estimate.minuteOfDay % 24, "$year")
+            assertTrue(estimate.minuteOfDay in 0..1439, "$year")
+            assertEquals(estimate.minuteOfDay / 60, estimate.hour, "$year")
+            assertEquals(estimate.minuteOfDay % 60, estimate.minute, "$year")
+        }
     }
 
     @Test fun corrected2012DateLevelTransitions() {

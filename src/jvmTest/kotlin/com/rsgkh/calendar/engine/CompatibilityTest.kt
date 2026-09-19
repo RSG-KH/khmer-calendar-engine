@@ -49,7 +49,7 @@ class CompatibilityTest {
             }
             for (year in 1800..2200) {
                 val value = engine.newYear(year)
-                out.appendLine("N\t$year\t${value.start.iso}\t${value.days}")
+                out.appendLine("N\t$year\t${value.start.iso}\t${value.days}\t${value.arrivalEstimate.minuteOfDay}")
                 // Exercise each recurrence family in both compiled targets.
                 val rules = arrayOf(
                     RecurrenceRule("fixed", "solar", 5, 14),

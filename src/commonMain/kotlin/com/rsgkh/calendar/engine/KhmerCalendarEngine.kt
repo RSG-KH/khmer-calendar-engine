@@ -25,8 +25,22 @@ class CalendarDate internal constructor(
     init { freezeValue(this) }
 }
 
+/** Traditional-arithmetic estimate of the Moha Sangkran arrival minute-of-day on the
+ * festival's first date. This is **not** an official or certified time: the arithmetic
+ * can only produce minutes on a 24-minute lattice and disagrees with reviewed
+ * publications by 1–24 minutes. Published arrival clocks are maintained per year as
+ * source-tagged data outside this engine. See docs/references.md. */
 @JsExport
-class NewYearCelebration internal constructor(val start: GregorianDate, val days: Int) {
+class ArrivalEstimate internal constructor(val minuteOfDay: Int) {
+    init { freezeValue(this) }
+    val hour: Int get() = minuteOfDay / 60
+    val minute: Int get() = minuteOfDay % 60
+}
+
+@JsExport
+class NewYearCelebration internal constructor(
+    val start: GregorianDate, val days: Int, val arrivalEstimate: ArrivalEstimate,
+) {
     init { freezeValue(this) }
     val end: GregorianDate get() = start.plusDays(days - 1)
     val dates: Array<GregorianDate> get() = Array(days) { start.plusDays(it) }
@@ -35,7 +49,7 @@ class NewYearCelebration internal constructor(val start: GregorianDate, val days
 /** Pure calendar API. Dates are civil dates; year labels do not express arrival instants. */
 @JsExport
 class KhmerCalendarEngine {
-    val version: String get() = "0.2.0"
+    val version: String get() = "0.3.0"
     val minYear: Int get() = MIN_YEAR
     val maxYear: Int get() = MAX_YEAR
 

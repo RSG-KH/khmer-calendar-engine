@@ -1,6 +1,6 @@
 # Calendar evidence and references
 
-Updated **16 September 2026**. This is the engine's self-contained record of external calendar evidence: what each source supports, which results are corroborated, and what remains unresolved. The calculations and their tests are maintained in this repository.
+Updated **19 September 2026**. This is the engine's self-contained record of external calendar evidence: what each source supports, which results are corroborated, and what remains unresolved. The calculations and their tests are maintained in this repository.
 
 ## Evidence standard
 
@@ -14,24 +14,103 @@ The sources below were reviewed on 15 September 2026 unless an earlier review da
 
 ## Reviewed New Year cases
 
-The following table brings the upstream calculation, override and external evidence together. The shared engine's date-only tests cover the reviewed modern dates; arrival minutes are retained as evidence and are not exposed by the API. The 1879/1897 upstream exceptions have not been adopted without historical support.
+The following table brings the upstream calculation, override and external evidence together. The shared engine's date-only tests cover the reviewed modern dates. Since 0.3.0 the traditional arithmetic's time path is exposed as `arrivalEstimate` — the "formula" column below, an estimate on a 24-minute lattice that is never an authority; published arrival clocks are maintained per year by the manager as source-tagged data. The 1879/1897 upstream exceptions are rejected without historical support.
 
 | Year | MomentKH formula without its table | MomentKH with its table | Result supported by the reviewed sources |
 | --- | --- | --- | --- |
 | 1879 | 12 April, 10:00 | 12 April, 11:36 | Unverified: no historical calendar or almanac found |
 | 1897 | 12 April, 02:00 | 13 April, 02:00 | Unverified: no historical calendar or almanac found |
-| 2011 | 14 April, 13:36 | 14 April, 13:12 | **14 April, 13:12** — [N01](#n01--the-cambodia-daily-15-april-2011) |
-| 2012 | 13 April, 19:12 | 14 April, 19:11 | **13 April, 19:11** — [T06](#t06--bodhikaram-new-year-announcement-2-april-2012), [N02](#n02--the-cambodia-daily-11-april-2012); **13–15 April** holiday dates also supported by [G01](#g01--eccc-information-circular-e1651-official-holidays-for-2012) |
-| 2013 | 14 April, 02:24 | 14 April, 02:12 | **14 April, 02:12** — [N03](#n03--the-cambodia-daily-13-april-2013) |
-| 2014 | 14 April, 08:24 | 14 April, 08:07 | **14 April, 08:07** — [N04](#n04--the-cambodia-daily-15-april-2014) |
-| 2015 | 14 April, 14:24 | 14 April, 14:02 | **14 April, 14:02** — user's [T03](#t03--templenews-2015-calendar-observation) calendar check and [N07](#n07--visit-angkor-2015) |
-| 2024 | 13 April, 22:24 | 13 April, 22:17 | **13 April, 22:24** — user's [T04](#t04--templenews-2024-calendar-observation) calendar check, [N09](#n09--cambodianess-13-april-2024), [N10](#n10--camboja-9-april-2024); retain the 22:17 ceremony report as contextual evidence |
+| 2010 | 14 April, 07:36 | — | **14 April, 07:36** — [TVK broadcast archive](#tvk-national-television-broadcast-archive-19-september-2026) |
+| 2011 | 14 April, 13:36 | 14 April, 13:12 | **14 April, 13:12** — [N01](#n01--the-cambodia-daily-15-april-2011), [TVK](#tvk-national-television-broadcast-archive-19-september-2026) |
+| 2012 | 13 April, 19:12 | 14 April, 19:11 | **13 April, 19:11** — [T06](#t06--bodhikaram-new-year-announcement-2-april-2012), [N02](#n02--the-cambodia-daily-11-april-2012), [TVK](#tvk-national-television-broadcast-archive-19-september-2026); **13–15 April** holiday dates also supported by [G01](#g01--eccc-information-circular-e1651-official-holidays-for-2012) |
+| 2013 | 14 April, 02:24 | 14 April, 02:12 | **14 April, 02:12** — [N03](#n03--the-cambodia-daily-13-april-2013), [S06](#moha-sangkran-arrival-time-research-18-september-2026) inspected calendar, [TVK](#tvk-national-television-broadcast-archive-19-september-2026) |
+| 2014 | 14 April, 08:24 | 14 April, 08:07 | **14 April, 08:07** — [N04](#n04--the-cambodia-daily-15-april-2014), [TVK](#tvk-national-television-broadcast-archive-19-september-2026) |
+| 2015 | 14 April, 14:24 | 14 April, 14:02 | **14 April, 14:01** — [TVK broadcast archive](#tvk-national-television-broadcast-archive-19-september-2026) primary Khmer announcement; [T03](#t03--templenews-2015-calendar-observation) and [N07](#n07--visit-angkor-2015) previously reported 14:02 |
+| 2016 | 13 April, 20:00 | — | **13 April, 20:00** — [S08](#moha-sangkran-arrival-time-research-18-september-2026) inspected calendar, [TVK](#tvk-national-television-broadcast-archive-19-september-2026) |
+| 2017 | 14 April, 03:12 | — | **14 April, 03:12** — [TVK broadcast archive](#tvk-national-television-broadcast-archive-19-september-2026) |
+| 2018 | 14 April, 09:12 | — | **14 April, 09:12** — [S09](#moha-sangkran-arrival-time-research-18-september-2026) inspected calendar, [S10](#moha-sangkran-arrival-time-research-18-september-2026) contemporaneous report, [TVK](#tvk-national-television-broadcast-archive-19-september-2026) |
+| 2019 | 14 April, 15:12 | — | **14 April, 15:12** — [TVK broadcast archive](#tvk-national-television-broadcast-archive-19-september-2026) |
+| 2020 | 13 April, 20:48 | — | **13 April, 20:48** — [TVK broadcast archive](#tvk-national-television-broadcast-archive-19-september-2026), resolving the printed diaspora calendar typo ([S13–S14](#moha-sangkran-arrival-time-research-18-september-2026)); the engine's 13 April start is confirmed |
+| 2021 | 14 April, 04:00 | — | **14 April, 04:00** — [TVK broadcast archive](#tvk-national-television-broadcast-archive-19-september-2026) |
+| 2022 | 14 April, 10:00 | — | **14 April, 10:00** — [S15](#moha-sangkran-arrival-time-research-18-september-2026) inspected proclamation, [S17](#moha-sangkran-arrival-time-research-18-september-2026) contemporaneous report, [TVK](#tvk-national-television-broadcast-archive-19-september-2026) |
+| 2023 | 14 April, 16:00 | — | **14 April, 16:00** — [TVK broadcast archive](#tvk-national-television-broadcast-archive-19-september-2026) |
+| 2024 | 13 April, 22:24 | 13 April, 22:17 | **13 April, 22:17:24** — [TVK broadcast archive](#tvk-national-television-broadcast-archive-19-september-2026) second precision, resolving the 22:24 traditional lattice ([T04](#t04--templenews-2024-calendar-observation)) vs 22:17 ceremony dispute |
+| 2025 | 14 April, 04:48 | — | **14 April, 04:48** — [S23](#moha-sangkran-arrival-time-research-18-september-2026), AKP government news (grade A), [TVK](#tvk-national-television-broadcast-archive-19-september-2026) |
+| 2026 | 14 April, 10:48 | — | **14 April, 10:48** — [S24–S25](#moha-sangkran-arrival-time-research-18-september-2026), AKP government news (grade A), [TVK](#tvk-national-television-broadcast-archive-19-september-2026) |
 
-For **2012**, the formula's date is supported and the table's date override is wrong. The formula's arrival minute still differs from the reviewed 19:11. For **2011, 2013, 2014 and 2015**, the table's time corrections have supporting evidence. For **2024**, reviewed traditional-arrival evidence supports the formula's 22:24; the cause of the separate 22:17 ceremony report remains unresolved. Date accuracy and time accuracy must be tested separately.
+For **2012**, the formula's date is supported and the table's date override is wrong. The formula's arrival minute still differs from the reviewed 19:11. For **2011, 2013, 2014 and 2015**, the table's time corrections have supporting evidence (with 2015 established at 14:01 by TVK Khmer broadcast). For **1997, 2010, 2016–2023, 2025 and 2026**, the formula matches the official broadcast to the exact minute (0m error on the 24m lattice). For **2024**, official national television broadcast confirmed **13 April, 22:17:24**, resolving the 22:24 lattice calculation and 22:17 ceremony dispute. For **2020**, TVK broadcast confirmed the arrival on the night of **13 April, 20:48**, resolving the diaspora calendar typo. Date accuracy and time accuracy must be tested separately.
 
 ### How the formula and table were compared
 
 A Node.js probe loaded the [pinned MomentKH implementation](#a01--momentkh-pinned-baseline) in two VM contexts: unchanged, and with only `khNewYearMoments` replaced by an empty table in memory. Both called the actual `getNewYear` function with the process time zone set to `Asia/Phnom_Penh`. No arithmetic was changed. This establishes what the code outputs, not historical accuracy. The modern time-zone setting does not establish the applicable time convention for 1879 or 1897.
+
+## Moha Sangkran arrival-time research (18 September 2026)
+
+A dedicated evidence review investigated whether the arrival time-of-day can be computed or must be sourced per year. Its decision: **a curated, source-tagged per-year dataset** — the shipped festival-date arithmetic stays untouched, and the engine exposes only the estimate documented above. The full report, seed dataset and diagnostics live in the `research-khmer-new-year-time` package; the load-bearing findings follow.
+
+### Structural limitation: the 24-minute lattice
+
+The pinned time path selects the first of four candidate day-counts whose corrected within-sign degree is zero, then converts its integer arc-minute remainder (`libda`) by `clockMinutes = 1440 − 24 × libda`. Every computed minute-of-day is therefore a multiple of 24; within an hour only :00, :12, :24, :36 and :48 can appear. Published clocks such as 19:11, 08:07 or 14:01 are unreachable by **any** retuning of the six-segment interpolation table — a structural restriction, not a constants problem. The published-minus-estimate residuals for 2011–2015 are −24, −1, −12, −17 and −23 minutes; no single zone shift or zero-point correction equals them all.
+
+### No known astronomical formula reproduces the published times
+
+A negative-control experiment with Swiss Ephemeris 2.10.03 (Moshier backend) solved apparent geocentric solar longitude zero under tropical, Lahiri-sidereal and Fagan/Bradley-sidereal definitions for the eight best-evidenced years. The tropical ingress falls in March; Fagan/Bradley differs substantially (2024: 14 April 20:12:29 UTC+7); Lahiri comes close in some recent years but never to the published minute, and fails across 2011–2015. The ministry almanac's actual definition — epoch, ayanamsha, solar model, meridian, rounding — remains unrecovered.
+
+### The publishing authority
+
+The 2012–2013 Cambodia Daily reports attribute their times to the Ministry of Cults and Religion's almanac. A 2022 VOD interview [S18](#moha-sangkran-arrival-time-research-18-september-2026) identifies Im Borin, then an adviser to that ministry, as author of the annual *Moha Sangkran* publication, issued by a ministry-established astrology committee since 1998. Exact minutes are an annual editorial act by an unpublished method; no open machine-readable archive of the almanac series was found.
+
+### Lerng Sak second-level clocks (research only)
+
+Several inspected calendars print a closing (Lerng Sak) time to the second. The identity `seconds = 108 × ((292207·y + 373) mod 800)` with `y = year − 638` — equivalently `(800 − kromthupul) × 108` — matches 2012 (23:43:48, [T06](#t06--bodhikaram-new-year-announcement-2-april-2012)), 2015, 2018, 2020 and 2022 exactly, but the inspected 2016 proclamation prints **00:24:12** where the identity computes 00:34:12. With a recorded counterexample and shared publisher lineage, this stays a research diagnostic; the upstream `lerngSakMoment` is initialized to midnight and must not be cited as implementing the tradition.
+
+### 1879 and 1897: rejected
+
+The pinned table's claims (12 April 1879 11:36; 13 April 1897 02:00) have no era-appropriate historical support; code and commit history are not evidence. Both entries are **rejected from production arrival data** unless historical evidence is acquired — "unverified and excluded" rather than disproven. The concrete archival lead is F. G. Faraut, *Astronomie cambodgienne* (1910), catalogued by the Center for Khmer Studies; it was not obtained or inspected.
+
+### TVK National Television broadcast archive (19 September 2026)
+
+Official broadcast descriptions and announcements from the National Television of Cambodia (TVK, ទូរទស្សន៍ជាតិកម្ពុជា) established an unbroken 17-year timeline across **2010–2026**, alongside older anchors in **1997** (22:48) and **2009** (01:30).
+
+Key findings from the national broadcaster:
+- **2024 dispute resolved:** TVK broadcast explicitly gave **13 April 2024 at 22:17:24** (២២និង១៧នាទី និង២៤វិនាទី). The printed calendar's 22:24 is explained as the traditional lattice calculation, while the official broadcast used second-level precision.
+- **2020 resolution:** TVK announced on the evening of 13 April 2020 that the angel arrives tonight at **20:48** (២០និង ៤៨ នាទីយប់នេះ), resolving the diaspora printed calendar's typo (which printed 14 April with an invalid weekday) and confirming the engine's 13 April date.
+- **2015 correction:** TVK primary Khmer text explicitly gave **14:01** (១៤:០១), correcting the previous 14:02 reading.
+- **6-hour progression:** Consecutive non-leap years advance by exactly 6 hours (e.g. 2017 03:12 → 2018 09:12 → 2019 15:12, and 2021 04:00 → 2022 10:00 → 2023 16:00), reflecting the ~0.25-day solar year offset.
+- **Engine comparison:** 12 of the 19 evidenced years match the engine's traditional calculation to the exact minute (0m error: 1997, 2010, 2016–2023, 2025, 2026). Off-lattice minutes (e.g. 19:11, 08:07, 14:01, 22:17:24) differ by 1–24 minutes because the traditional formula is mathematically bound to multiples of 24.
+
+### Research source register (S02–S25)
+
+All items retrieved 18 September 2026. Grades: **A** direct government statement; **B** contemporaneous reporting (B† without explicit almanac attribution); **C** calendar scan personally inspected by the review; **E** computed or unsourced website data. Zone labels are absent from all arrival statements below except where noted; modern Cambodian wall clocks are interpreted as UTC+07:00, stored separately from the source wording.
+
+| ID | Source | Supports |
+| --- | --- | --- |
+| S02 | [Cambodia Daily, 15 Apr 2011](https://english.cambodiadaily.com/2011/04/15/cambodia-welcomes-its-angel-for-the-new-year/) — B | 14 Apr 2011, 13:12 |
+| S03 | [Cambodia Daily, 11 Apr 2012](https://english.cambodiadaily.com/2012/04/11/cambodians-prepare-for-arrival-of-khmer-new-year-angel/) — B | **13 Apr 2012, 19:11**, almanac attribution |
+| S04 | [Cambodia Daily, 13 Apr 2013](https://english.cambodiadaily.com/2013/04/13/khmer-new-year-devada-set-to-welcome-age-of-consumerism/) — B | 14 Apr 2013, 02:12 |
+| S05 | [Cambodia Daily, 15 Apr 2014](https://english.cambodiadaily.com/2014/04/15/phnom-penh-welcomes-the-new-years-angel/) — B | 14 Apr 2014, 08:07 |
+| S06 | [Wat Ratanarangsey 2013 calendar PDF](https://www.templenews.org/wp-content/uploads/2012/10/Calendar-Wat-Revere-2013-2557.pdf) — C | 14 Apr 2013, 02:12 (April page) |
+| S07 | [Wat Kiryvongsa Bopharam 2015 calendar PDF](https://www.templenews.org/wp-content/uploads/2014/12/KhmerCalendar2559-2015.pdf) — C | 14 Apr 2015, 14:02; Lerng Sak 16 Apr 18:21:36 |
+| S08 | [Wat Kiryvongsa Bopharam 2016 calendar PDF](https://www.templenews.org/wp-content/uploads/2015/12/Khmer-Calendar-2560-2016.pdf) — C | 13 Apr 2016, 20:00; Lerng Sak printed 00:24:12 (counterexample) |
+| S09 | [Wat Kiryvongsa Bopharam 2018 calendar PDF](https://www.templenews.org/wp-content/uploads/2017/12/Khmer-2562-2018-Calendar.pdf) — C | 14 Apr 2018, 09:12; Lerng Sak 12:59:24 |
+| S10 | [Phnom Penh Post, 13 Apr 2018](https://phnompenhpost.com/national/trouble-foreseen-khmer-new-year-almanac/) — B | 14 Apr 2018, 09:12 |
+| S11 | [Bodhikaram announcement, 2 Apr 2012](https://bodhikaram.wordpress.com/2012/04/02/khmer-new-year-april-13-14-2012/) — E* temple HTML | Same as [T06](#t06--bodhikaram-new-year-announcement-2-april-2012) |
+| S12 | [Bodhikaram 2012 calendar PDF](https://bodhikaram.wordpress.com/wp-content/uploads/2012/04/bodhikaram-calendar-2012.pdf) — C, dates only | Festival-date block; no clock on the April page |
+| S13 | [2020 calendar year panel](https://www.templenews.org/wp-content/uploads/2019/12/%E1%9E%81%E1%9F%82%E1%9E%98%E1%9E%B7%E1%9E%82%E1%9E%9F%E1%9E%B7%E1%9E%9A%E1%9F%A2.jpg) — C | Prints 14 Apr 2020, 20:48 with inconsistent weekday |
+| S14 | [2020 calendar proclamation](https://www.templenews.org/wp-content/uploads/2019/12/%E1%9E%81%E1%9F%82%E1%9E%98%E1%9E%B7%E1%9E%82%E1%9E%9F%E1%9E%B7%E1%9E%9A%E1%9F%A3.jpg) — C | Repeats 14 Apr 20:48; closing 16 Apr 01:24:36 |
+| S15 | [2022 calendar proclamation](https://www.templenews.org/wp-content/uploads/2021/12/%E1%9E%9F%E1%9E%84%E1%9F%92%E1%9E%80%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%93%E1%9F%92%E1%9E%8A.jpg) — C | 14 Apr 2022, 10:00; Lerng Sak 13:49:48 |
+| S16 | [2022 companion panel](https://www.templenews.org/wp-content/uploads/2021/12/%E1%9E%94%E1%9F%92%E1%9E%9A%E1%9E%8F%E1%9E%B7%E1%9E%91%E1%9E%B7%E1%9E%93-%E1%9E%86%E1%9F%92%E1%9E%93%E1%9E%B6%E1%9F%86%E1%9E%81%E1%9E%B6%E1%9E%9B-%E1%9E%85%E1%9E%8F%E1%9F%92%E1%9E%9C%E1%9E%B6%E1%9E%9F%E1%9F%90%E1%9E%80-%E1%9E%96.%E1%9E%9F.%E1%9F%A2%E1%9F%A5%E1%9F%A6%E1%9F%A6.jpg) — C | Heading 13 Apr vs list 14 Apr; clock 10:00 — internal conflict |
+| S17 | [Cambodianess, 14 Apr 2022](https://cambodianess.com/article/the-three-days-of-khmer-new-year) — B† | 14 Apr 2022, 10:00 |
+| S18 | [VOD, 8 Apr 2022](https://vodenglish.news/cambodias-new-year-angel-will-have-a-gun-to-protect-the-border/) — B | Almanac authorship and committee provenance |
+| S19 | [Wat Kiryvongsa Bopharam 2024 calendar PDF](https://www.templenews.org/wp-content/uploads/2023/12/Khmer-Calendar-2567-2568.pdf) — C | 13 Apr 2024, 22:24 (upgrades [T04](#t04--templenews-2024-calendar-observation)) |
+| S20 | [Cambodianess, 13 Apr 2024](https://cambodianess.com/article/khmer-new-year-things-to-know-about-cambodias-largest-festival) — B† | 13 Apr 2024, 22:24 |
+| S21 | [Cambodianess, 29 Mar 2024](https://cambodianess.com/article/wat-phnom-to-host-phnom-penhs-khmer-new-year) — B, ceremony | Wat Phnom ceremony 22:17, not the arrival |
+| S22 | [Fresh News, 13 Apr 2024](https://freshnews.com.kh/localnews/336733-2024-04-13-14-36-09.html) — B†, Khmer | Nationwide/diaspora welcome 22:17:24 |
+| S23 | [AKP, 13 Apr 2025](https://www.akp.gov.kh/post/detail/334275) — **A** | **14 Apr 2025, 04:48** |
+| S24 | [AKP, 14 Apr 2026](https://akp.gov.kh/post/detail/367694) — **A** | **14 Apr 2026, 10:48** |
+| S25 | [AKP, 13 Apr 2026](https://akp.gov.kh/post/detail/367629) — **A** | Separates 13 Apr merit ceremony from the 10:48 start |
+
+The [TempleNews calendar archive](https://www.templenews.org/category/calendar/) (T01) supplied the calendar editions; announcements and over-size PDFs for 2021, 2023, 2025 and 2026 editions were located but not successfully inspected, so no C-grade claim is made for those years.
 
 ## Printed calendars and user observations
 
@@ -47,13 +126,13 @@ A Node.js probe loaded the [pinned MomentKH implementation](#a01--momentkh-pinne
 
 [Wat Kiry Vongsa Bopharam calendar publication](https://www.templenews.org/2015/01/02/wat-kiry-vongsa-bopharam/), 2 January 2015; [2015 calendar PDF](https://www.templenews.org/wp-content/uploads/2014/12/KhmerCalendar2559-2015.pdf).
 
-On 15 September 2026 the user checked this edition and reported **14 April 2015, 14:02**. This is **user-transcribed evidence**, corroborating MomentKH's time override and [N07](#n07--visit-angkor-2015). The assistant located the publisher's catalogue link and PDF metadata but did not independently inspect the scan. A specific page number remains to be recorded.
+On 15 September 2026 the user checked this edition and reported **14 April 2015, 14:02**. This is **user-transcribed evidence**, corroborating MomentKH's time override and [N07](#n07--visit-angkor-2015). The 18 September 2026 [arrival-time research](#moha-sangkran-arrival-time-research-18-september-2026) later inspected the PDF directly (proclamation page 2, April page 6) and confirmed the transcription; the record was noted via [S07](#moha-sangkran-arrival-time-research-18-september-2026). The [TVK broadcast archive](#tvk-national-television-broadcast-archive-19-september-2026) established **14:01** from primary Khmer announcements.
 
 ### T04 — TempleNews 2024 calendar observation
 
 [Free Copy: The 2568 2024 Khmer Calendar](https://www.templenews.org/2023/12/17/free-copy-2568-2024-khmer-calendar/), published 17 December 2023; [Khmer Calendar 2567–2568 PDF](https://www.templenews.org/wp-content/uploads/2023/12/Khmer-Calendar-2567-2568.pdf). The article and 14-page PDF metadata were retrieved on 15 September 2026.
 
-On 15 September 2026 the user reported **13 April 2024, 22:24** after checking the TempleNews calendar. This is **user-transcribed evidence**, agreeing with [N09](#n09--cambodianess-13-april-2024) and [N10](#n10--camboja-9-april-2024). The links above locate the publisher's matching-year calendar; the user did not provide a file hash or page number. The assistant has not inspected the scan. Preserve [N08](#n08--cambodianess-29-march-2024) as a separate 22:17 ceremony report.
+On 15 September 2026 the user reported **13 April 2024, 22:24** after checking the TempleNews calendar. This is **user-transcribed evidence**, agreeing with [N09](#n09--cambodianess-13-april-2024) and [N10](#n10--camboja-9-april-2024). The 18 September 2026 [arrival-time research](#moha-sangkran-arrival-time-research-18-september-2026) inspected the PDF's year panel and proclamation (pages 13–14) and confirmed the transcription; the record was noted via [S19](#moha-sangkran-arrival-time-research-18-september-2026). The national broadcaster [TVK](#tvk-national-television-broadcast-archive-19-september-2026) confirmed **13 April 2024, 22:17:24** in its official broadcast, explaining 22:24 as the traditional 24-minute lattice calculation.
 
 ### T05 — Bodhikaram 2012 calendar
 
@@ -202,10 +281,10 @@ The **1879 and 1897 entries remain historically unverified**. The exact 2012, 20
 
 ## Validation still required
 
-1. Check New Year arrival times in years without upstream exceptions.
-2. Verify lunar dates around extra months, extra days and month endings against printed calendars or almanacs.
-3. Verify Buddhist holy days and Buddhist Era, animal-year and Sak transitions, distinguishing calendar dates from precise instants.
-4. Add page locators for the 2015 and 2024 TempleNews observations and obtain original almanacs where current evidence is indirect.
-5. Resolve 1879/1897 only when suitable historical evidence becomes available. Keep them unverified meanwhile.
+1. Arrival times: while TVK national broadcast records provide 19 evidenced years (1997, 2009, 2010–2026 unbroken), obtaining the ministry's original printed Moha Sangkran almanac archive and internal computational algorithm (angular precision, meridian, rounding) remains an open research topic. Until then the per-year dataset carries the published clocks, and the estimate stays labeled as such.
+2. A second independently transcribed 2016 proclamation would test the Lerng Sak 24-versus-34-minute conflict in the closing-clock candidate.
+3. Verify lunar dates around extra months, extra days and month endings against printed calendars or almanacs.
+4. Verify Buddhist holy days and Buddhist Era, animal-year and Sak transitions, distinguishing calendar dates from precise instants.
+5. Resolve 1879/1897 only when suitable historical evidence becomes available (Faraut 1910 is the archival lead). They stay rejected meanwhile.
 
 Each adopted rule or exception should have a focused regression case, a source locator and a documented calendar/time convention. A single verified date does not validate an entire year or formula. The goal is the strongest accuracy we can substantiate, with remaining uncertainty stated explicitly.
