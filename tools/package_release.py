@@ -93,7 +93,7 @@ def stage(root: Path, version: str) -> Path:
 
 The release workflow runs JVM and JavaScript tests, cross-target parity checks, the TypeScript/Vite/headless-browser consumer, and Android Java/Kotlin consumer tests with APK assembly before publishing.
 
-Calculations run offline. Event catalogs and government holiday lists are maintained separately. The supported range is 1800–2200; independent historical validation remains incomplete, including 1879/1897. New Year arrival times are exposed only as a clearly-labeled estimate (arrivalEstimate) whose minutes lie on a 24-minute lattice; published arrival clocks are maintained per year as source-tagged data in the manager, never computed here. See the tagged source's README and docs/references.md for evidence and limitations.
+Calculations run offline. Event catalogs and government holiday lists are maintained separately. The Khmer calendar supported range is 1800–2200; independent historical validation remains incomplete, including 1879/1897. New Year arrival times are exposed only as a clearly-labeled estimate (arrivalEstimate) whose minutes lie on a 24-minute lattice; published arrival clocks are maintained per year as source-tagged data in the manager, never computed here. The standalone ChineseZodiacCalculator provides Ganzhi (sexagenary) day and hour pillars over the proleptic Gregorian range 1..9999 in local civil time. See the tagged source's README and docs/references.md for evidence and limitations.
 """, encoding="utf-8", newline="\n")
     return output
 

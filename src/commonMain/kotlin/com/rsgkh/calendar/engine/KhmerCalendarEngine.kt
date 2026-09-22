@@ -49,7 +49,7 @@ class NewYearCelebration internal constructor(
 /** Pure calendar API. Dates are civil dates; year labels do not express arrival instants. */
 @JsExport
 class KhmerCalendarEngine {
-    val version: String get() = "0.3.0"
+    val version: String get() = "0.4.0"
     val minYear: Int get() = MIN_YEAR
     val maxYear: Int get() = MAX_YEAR
 

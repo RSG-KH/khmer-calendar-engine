@@ -1,6 +1,6 @@
 # API and calendar conventions
 
-Version **0.3.0** adds the New Year arrival estimate; 0.1.0 established the API and 0.2.0 added recurrence rules and the Chinese lunisolar engine. Kotlin and Java use package `com.rsgkh.calendar.engine`; JavaScript uses named exports from `khmer-calendar-engine`. Results contain facts and indices; applications supply translations and display formatting.
+Version **0.4.0** adds Chinese sexagenary cycle (Ganzhi) daily and hourly zodiac calculations; 0.3.0 added the New Year arrival estimate; 0.1.0 established the API and 0.2.0 added recurrence rules and the Chinese lunisolar engine. Kotlin and Java use package `com.rsgkh.calendar.engine`; JavaScript uses named exports from `khmer-calendar-engine`. Results contain facts and indices; applications supply translations and display formatting.
 
 ## Dates
 
@@ -72,3 +72,21 @@ Offsets and durations apply to each anchor and may extend into adjacent years. O
 `EventDateOverride(ruleId, year, dates, sourceId, reason)` replaces all calculated occurrences for one anchor year. An empty date array cancels that year's occurrences. It can supply explicit dates outside the rule's normal effective-year interval. The ID and anchor year must match the evaluated rule; source and reason are required, and duplicate dates are rejected.
 
 An `EventOccurrence` includes `ruleId`, `date`, `basis` (`calculated` or `source_override`) and nullable `sourceId`. The source ID refers to the manager's source record; the engine does not fetch it or verify the publication. Labels, official leave, substitute days, amendments and one-off historical records belong to versioned event data maintained by the manager. A calculated festival does not automatically become a government public holiday.
+
+## Chinese daily and hourly zodiac (Ganzhi)
+
+The standalone `ChineseZodiacCalculator` provides pure integer sexagenary calculations (*Ganzhi*, 干支) for days and hours across the proleptic Gregorian calendar (1..9999).
+
+| Operation | Result |
+| --- | --- |
+| `gregorianToJdn(year, month, day)` | Integer astronomical Julian Day Number (JDN) |
+| `getDayPillar(year, month, day)` | `GanzhiPillar`: Stem, Branch, Chinese name, Pinyin, English and Khmer animal |
+| `getHourBranch(hourOfDay)` | `EarthlyBranch`: 0..23 mapped to 12 two-hour windows |
+| `getHourPillar(dayStem, hourOfDay)` | `GanzhiPillar`: Hour stem and branch using the Five Rats rule |
+| `getHourPillarForDate(year, month, day, hour)` | `GanzhiPillar`: Hour pillar with automated 23:00 day-stem rollover |
+
+### Conventions & Time Boundary
+
+1. **Unbroken Sexagenary Count:** Day pillars follow the continuous modulo-60 counter `(JDN + 49) mod 60`, verified without interruption across historical records.
+2. **Local Civil Time:** Input hours (0–23) represent local civil clock time (UTC+7 in Cambodia). Geographical longitude and Equation of Time adjustments are intentionally left out of scope.
+3. **The 23:00 Zi Hour Rollover:** In traditional Chinese timekeeping, the early Rat (*Zi*, 子) hour begins at 23:00. `getHourPillarForDate` automatically advances the effective day stem by +1 day when `hourOfDay == 23`. Callers using the primitive `getHourPillar(dayStem, hourOfDay)` are expected to pass tomorrow's stem if evaluating at 23:00.

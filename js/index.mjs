@@ -1,5 +1,11 @@
 // Names and object-argument convenience only. All calendar calculations live in Kotlin.
-import { RecurrenceRule, ChineseLunisolarEngine, FestivalProfile } from './kotlin/khmer-calendar-engine.mjs';
+import {
+  RecurrenceRule,
+  ChineseLunisolarEngine,
+  FestivalProfile,
+  ChineseZodiacCalculator,
+  GregorianDate
+} from './kotlin/khmer-calendar-engine.mjs';
 export * from './kotlin/khmer-calendar-engine.mjs';
 
 const ruleFields = new Set(['id', 'type', 'month', 'day', 'waxing', 'offset', 'duration',
@@ -25,4 +31,51 @@ export function getChineseFestivalDates(year, festivalId, profile = 'archive-v1'
     ? FestivalProfile.Companion.fromId(profile)
     : (profile ?? FestivalProfile.ARCHIVE_V1);
   return new ChineseLunisolarEngine(p).getFestivalDates(year, festivalId);
+}
+
+// Kotlin exports an object as its class with a static getInstance(); the typed
+// surface for JS callers is these named wrappers.
+const zodiac = ChineseZodiacCalculator.getInstance();
+
+/** Integer astronomical Julian Day Number for a civil Gregorian date. */
+export function gregorianToJdn(year, month, day) {
+  return zodiac.gregorianToJdn(year, month, day);
+}
+
+/** The Earthly Branch (Zodiac animal) for a civil hour (0..23). */
+export function getHourBranch(hourOfDay) {
+  return zodiac.getHourBranch(hourOfDay);
+}
+
+/**
+ * Compute the Chinese Day Pillar (Ganzhi and Zodiac Animal).
+ * Accepts either (year, month, day) or a GregorianDate instance.
+ */
+export function getDayPillar(...args) {
+  if (args.length === 1 && args[0] instanceof GregorianDate) {
+    return zodiac.getDayPillarForGregorianDate(args[0]);
+  }
+  if (args.length === 3) {
+    return zodiac.getDayPillar(args[0], args[1], args[2]);
+  }
+  throw new TypeError(`getDayPillar expects 1 or 3 arguments, received ${args.length}`);
+}
+
+/**
+ * Compute the Chinese Hour Pillar. Accepts:
+ * - (dayStem: HeavenlyStem, hourOfDay: number)
+ * - (date: GregorianDate, hourOfDay: number)
+ * - (year: number, month: number, day: number, hourOfDay: number)
+ */
+export function getHourPillar(...args) {
+  if (args.length === 2) {
+    if (args[0] instanceof GregorianDate) {
+      return zodiac.getHourPillarForGregorianDate(args[0], args[1]);
+    }
+    return zodiac.getHourPillar(args[0], args[1]);
+  }
+  if (args.length === 4) {
+    return zodiac.getHourPillarForDate(args[0], args[1], args[2], args[3]);
+  }
+  throw new TypeError(`getHourPillar expects 2 or 4 arguments, received ${args.length}`);
 }

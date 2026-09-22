@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "com.rsgkh"
-version = "0.3.0"
+version = "0.4.0"
 
 // Developers install JDK 25 locally; CI provisions it with setup-java.
 tasks.named<UpdateDaemonJvm>("updateDaemonJvm") {

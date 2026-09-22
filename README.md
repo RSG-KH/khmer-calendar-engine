@@ -4,7 +4,7 @@ One Kotlin implementation, compiled into an **Android-compatible JVM library** a
 
 ## Status
 
-**0.3.0 — New Year arrival estimate.** Packages can be built locally; the [release workflow](docs/releasing.md) publishes tested packages to GitHub when a matching version tag is pushed. It does not publish to Maven Central or npm.
+**0.4.0 — Ganzhi day and hour zodiac.** Packages can be built locally; the [release workflow](docs/releasing.md) publishes tested packages to GitHub when a matching version tag is pushed. It does not publish to Maven Central or npm.
 
 Implemented:
 
@@ -14,6 +14,7 @@ Implemented:
 - The traditional arithmetic's **arrival-time estimate** (`arrivalEstimate`) — estimate-typed, minute precision, documented as never authoritative; published clocks are per-year data maintained by the manager.
 - Fixed-date, weekday, lunar and New Year recurrence rules; ordinary/second-Asadh selection.
 - Source-backed event date replacements and cancellations.
+- Chinese daily and hourly zodiac (*Ganzhi*) via the standalone `ChineseZodiacCalculator`: day pillars, hour branches and Five-Rats hour pillars over the proleptic Gregorian range 1..9999, in local civil time.
 
 The engine calculates dates and one clearly-labeled estimate. The separate manager maintains event definitions, translations, historical records, government yearly holiday publications and the source-tagged arrival-time dataset, with developer imports and versioned exports. Calculating a traditional festival does not establish official leave.
 
@@ -24,7 +25,7 @@ The engine calculates dates and one clearly-labeled estimate. The separate manag
 Add the built Maven repository (`build/repository`), or the extracted `repository/` directory from a published Maven ZIP, to your project's repositories, then depend on:
 
 ```kotlin
-implementation("com.rsgkh:khmer-calendar-engine-jvm:0.3.0")
+implementation("com.rsgkh:khmer-calendar-engine-jvm:0.4.0")
 ```
 
 ```kotlin
@@ -77,10 +78,10 @@ Outputs:
 
 | Artifact | Location |
 | --- | --- |
-| JVM library | `build/libs/khmer-calendar-engine-jvm-0.3.0.jar` |
+| JVM library | `build/libs/khmer-calendar-engine-jvm-0.4.0.jar` |
 | Maven repository, including dependency metadata | `build/repository` |
 | ESM package and TypeScript declarations | `build/npm` |
-| Installable npm tarball | `build/khmer-calendar-engine-0.3.0.tgz` |
+| Installable npm tarball | `build/khmer-calendar-engine-0.4.0.tgz` |
 
 JDK 25 runs the build; the JVM artifact still targets Java 11 bytecode. Use Maven metadata to obtain its Kotlin standard-library dependency. The JavaScript package includes its compiled runtime; consumers do not need Kotlin or Java. Both artifacts include license notices.
 
@@ -88,9 +89,9 @@ The Kotlin compiler/plugin is 2.4.20, while the library's language/API level and
 
 ## Verification and accuracy
 
-Recorded **19 September 2026**:
+Recorded **22 September 2026**:
 
-- **22 JVM tests and 20 JavaScript tests pass**, including every supported date's Gregorian/lunar round trip and calendar boundary checks.
+- **27 JVM tests and 25 JavaScript tests pass**, including every supported date's Gregorian/lunar round trip, calendar boundary checks, and Ganzhi day/hour golden anchors on both targets.
 - Compiled JVM and packaged JavaScript agree on **146,462 dates**, **401 New Year results with arrival estimates** and **2,474 occurrences** across all six recurrence families; every estimate sits on the 24-minute lattice.
 - Lunar hashes match the pinned MomentKH compatibility fixture for **1900–2100**. Its incorrect 2012 New Year date is explicitly rejected by the regression test.
 - Reviewed modern New Year dates and published lunar-festival anchors pass focused tests.

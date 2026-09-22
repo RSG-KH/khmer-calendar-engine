@@ -1,4 +1,11 @@
-import type { RecurrenceRule, FestivalProfile } from './kotlin/khmer-calendar-engine.mjs';
+import type {
+  RecurrenceRule,
+  FestivalProfile,
+  GregorianDate,
+  HeavenlyStem,
+  EarthlyBranch,
+  GanzhiPillar
+} from './kotlin/khmer-calendar-engine.mjs';
 export * from './kotlin/khmer-calendar-engine.mjs';
 
 interface RuleBase {
@@ -23,3 +30,13 @@ export function getChineseFestivalDates(
   festivalId: string,
   profile?: FestivalProfile | FestivalProfileId
 ): Array<string>;
+
+export function getDayPillar(year: number, month: number, day: number): GanzhiPillar;
+export function getDayPillar(date: GregorianDate): GanzhiPillar;
+
+export function gregorianToJdn(year: number, month: number, day: number): number;
+export function getHourBranch(hourOfDay: number): EarthlyBranch;
+
+export function getHourPillar(dayStem: HeavenlyStem, hourOfDay: number): GanzhiPillar;
+export function getHourPillar(date: GregorianDate, hourOfDay: number): GanzhiPillar;
+export function getHourPillar(year: number, month: number, day: number, hourOfDay: number): GanzhiPillar;

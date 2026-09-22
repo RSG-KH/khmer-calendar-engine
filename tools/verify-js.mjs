@@ -17,6 +17,12 @@ const {
   FestivalProfile,
   ChineseLunarDate,
   getChineseFestivalDates,
+  HeavenlyStem,
+  EarthlyBranch,
+  gregorianToJdn,
+  getDayPillar,
+  getHourBranch,
+  getHourPillar,
 } = await import(pathToFileURL(packagePath).href);
 
 const engine = new KhmerCalendarEngine();
@@ -138,11 +144,39 @@ const zongziArchiveRule = createRule({ id: 'chinese_zongzi_festival', type: 'chi
 assert.deepEqual(engine.evaluateRule(2013, zongziArchiveRule).map(v => v.date.iso), ['2013-06-13']);
 assert.throws(() => createRule({ id: 'unknown_fest', type: 'chinese_festival' }));
 
+// --- Chinese Ganzhi (day/hour zodiac) JS Verification ---
+assert.equal(gregorianToJdn(2026, 1, 1), 2461042);
+const pillar = getDayPillar(2026, 1, 1);
+assert.equal(pillar.nameZh, '乙亥');
+assert.equal(pillar.animal, 'Pig');
+assert.equal(pillar.khmerAnimal, 'កុរ (Kor)');
+assert.equal(pillar.pinyin, 'Yǐ Hài');
+assert.equal(pillar.stem, HeavenlyStem.YI);
+assert.equal(pillar.branch, EarthlyBranch.HAI);
+assert.equal(getDayPillar(1949, 10, 1).nameZh, '甲子');
+assert.equal(getDayPillar(new GregorianDate(2008, 8, 8)).nameZh, '庚辰');
+
+assert.equal(getHourBranch(23).animal, 'Rat');
+assert.equal(getHourBranch(12).animal, 'Horse');
+assert.equal(getHourBranch(0).animal, 'Rat');
+assert.equal(getHourPillar(HeavenlyStem.GENG, 8).nameZh, '庚辰');
+assert.equal(getHourPillar(new GregorianDate(2026, 1, 1), 12).nameZh, '壬午');
+assert.equal(getHourPillar(2026, 1, 1, 12).nameZh, '壬午');
+assert.equal(getHourPillar(2026, 1, 1, 23).nameZh, '戊子');
+
+// Frozen result values, rejected non-integer and out-of-range inputs, arity dispatch.
+assert.throws(() => { pillar.nameZh = '丙寅'; }, TypeError);
+for (const bad of [NaN, Infinity, -Infinity, 12.5]) assert.throws(() => getHourBranch(bad));
+assert.throws(() => gregorianToJdn(2024, 2, 30));
+assert.throws(() => getDayPillar(2026, 1), TypeError);
+assert.throws(() => getHourPillar(2026, 1, 1), TypeError);
+
 console.log(JSON.stringify({
   days,
   years,
   occurrences,
   chineseFestivalEngine: 'verified',
+  ganzhiCalculator: 'verified',
   parity: 'passed',
   javascriptBoundaryChecks: 'passed',
 }, null, 2));
