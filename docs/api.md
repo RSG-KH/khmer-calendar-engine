@@ -1,6 +1,6 @@
 # API and calendar conventions
 
-Version **0.4.0** adds Chinese sexagenary cycle (Ganzhi) daily and hourly zodiac calculations; 0.3.0 added the New Year arrival estimate; 0.1.0 established the API and 0.2.0 added recurrence rules and the Chinese lunisolar engine. Kotlin and Java use package `com.rsgkh.calendar.engine`; JavaScript uses named exports from `khmer-calendar-engine`. Results contain facts and indices; applications supply translations and display formatting.
+Version **0.5.0** adds the astrological solar calendar — Lichun-anchored year pillars, sectional-term month pillars, the Four Pillars (BaZi) and clash branches; 0.4.0 added Chinese sexagenary cycle (Ganzhi) day and hour zodiac calculations; 0.3.0 added the New Year arrival estimate; 0.1.0 established the API and 0.2.0 added recurrence rules and the Chinese lunisolar engine. Kotlin and Java use package `com.rsgkh.calendar.engine`; JavaScript uses named exports from `khmer-calendar-engine`. Results contain facts and indices; applications supply translations and display formatting.
 
 ## Dates
 
@@ -73,9 +73,9 @@ Offsets and durations apply to each anchor and may extend into adjacent years. O
 
 An `EventOccurrence` includes `ruleId`, `date`, `basis` (`calculated` or `source_override`) and nullable `sourceId`. The source ID refers to the manager's source record; the engine does not fetch it or verify the publication. Labels, official leave, substitute days, amendments and one-off historical records belong to versioned event data maintained by the manager. A calculated festival does not automatically become a government public holiday.
 
-## Chinese daily and hourly zodiac (Ganzhi)
+## Chinese daily, hourly and astrological zodiac (Ganzhi)
 
-The standalone `ChineseZodiacCalculator` provides pure integer sexagenary calculations (*Ganzhi*, 干支) for days and hours across the proleptic Gregorian calendar (1..9999).
+The standalone `ChineseZodiacCalculator` provides pure integer sexagenary calculations (*Ganzhi*, 干支): day and hour pillars across the proleptic Gregorian calendar (1..9999), and the astrological solar calendar — year pillars, month pillars, the Four Pillars (*BaZi*) and clash branches — bounded by the sectional solar term table (1900..2100).
 
 | Operation | Result |
 | --- | --- |
@@ -84,9 +84,17 @@ The standalone `ChineseZodiacCalculator` provides pure integer sexagenary calcul
 | `getHourBranch(hourOfDay)` | `EarthlyBranch`: 0..23 mapped to 12 two-hour windows |
 | `getHourPillar(dayStem, hourOfDay)` | `GanzhiPillar`: Hour stem and branch using the Five Rats rule |
 | `getHourPillarForDate(year, month, day, hour)` | `GanzhiPillar`: Hour pillar with automated 23:00 day-stem rollover |
+| `getSectionalTermDay(year, month)` | Civil day (UTC+8) on which a sectional solar term (*Jie*) begins, 1900..2100 |
+| `getYearPillar(year, month, day)` | `GanzhiPillar`: astrological year; changes at Lichun (early February) |
+| `getMonthPillar(year, month, day)` | `GanzhiPillar`: astrological month from the 12 sectional terms and the Five Tigers rule |
+| `getFourPillars(year, month, day, hour)` | `FourPillars`: year, month, day and hour pillars plus the four clash branches (`yearClash` … `hourClash`, opposite branch at 180°) |
+
+Every `EarthlyBranch` and `GanzhiPillar` also exposes `clashBranch`, `clashAnimal` and `clashKhmerAnimal` (the *Liu Chong* / ឆុង opposite).
 
 ### Conventions & Time Boundary
 
 1. **Unbroken Sexagenary Count:** Day pillars follow the continuous modulo-60 counter `(JDN + 49) mod 60`, verified without interruption across historical records.
 2. **Local Civil Time:** Input hours (0–23) represent local civil clock time (UTC+7 in Cambodia). Geographical longitude and Equation of Time adjustments are intentionally left out of scope.
 3. **The 23:00 Zi Hour Rollover:** In traditional Chinese timekeeping, the early Rat (*Zi*, 子) hour begins at 23:00. `getHourPillarForDate` automatically advances the effective day stem by +1 day when `hourOfDay == 23`. Callers using the primitive `getHourPillar(dayStem, hourOfDay)` are expected to pass tomorrow's stem if evaluating at 23:00.
+4. **Astrological year and month boundaries (UTC+8):** Year pillars change at *Lichun* and month pillars at the 12 sectional terms (*Jie*), tabulated for 1900..2100 at the China Standard reference meridian (UTC+8) — the standard *Tong Shu* / BaZi convention, kept identical for Qingming to the Chinese lunisolar engine's `cn-reference-utc8` data. Term days follow the published almanac record (Hong Kong Observatory tables); for terms falling within a few minutes of UTC+8 midnight the published day is stored, which for 15 terms differs from a raw modern recomputation. `tools/generate_solar_terms.py` regenerates and validates the table, including that Qingming equality.
+5. **Day-boundary transitions:** A solar-term transition takes effect at 00:00 of the term's civil date — the civil calendar day model, not minute-level natal-chart casting. Within `getFourPillars`, only the day and hour pillars roll at 23:00; the year and month pillars keep the calendar date.

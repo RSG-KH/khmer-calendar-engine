@@ -48,6 +48,11 @@ enum class EarthlyBranch(
     XU(10, "戌", "Xū", "Dog", "ច (Cho)"),
     HAI(11, "亥", "Hài", "Pig", "កុរ (Kor)");
 
+    /** The opposing clash branch at 180 degrees (Liu Chong / ឆុង). */
+    val clashBranch: EarthlyBranch get() = fromIndex(index + 6)
+    val clashAnimal: String get() = clashBranch.animal
+    val clashKhmerAnimal: String get() = clashBranch.khmerAnimal
+
     companion object {
         fun fromIndex(index: Int): EarthlyBranch = entries[floorMod(index, 12)]
     }
@@ -66,6 +71,27 @@ data class GanzhiPillar(
     val pinyin: String get() = "${stem.pinyin} ${branch.pinyin}"
     val animal: String get() = branch.animal
     val khmerAnimal: String get() = branch.khmerAnimal
+    val clashBranch: EarthlyBranch get() = branch.clashBranch
+    val clashAnimal: String get() = branch.clashAnimal
+    val clashKhmerAnimal: String get() = branch.clashKhmerAnimal
 
     override fun toString(): String = nameZh
+}
+
+/** The complete Four Pillars of Destiny (BaZi) with the four clash branches. */
+@JsExport
+data class FourPillars(
+    val year: GanzhiPillar,
+    val month: GanzhiPillar,
+    val day: GanzhiPillar,
+    val hour: GanzhiPillar
+) {
+    init {
+        freezeValue(this)
+    }
+
+    val yearClash: EarthlyBranch get() = year.clashBranch
+    val monthClash: EarthlyBranch get() = month.clashBranch
+    val dayClash: EarthlyBranch get() = day.clashBranch
+    val hourClash: EarthlyBranch get() = hour.clashBranch
 }

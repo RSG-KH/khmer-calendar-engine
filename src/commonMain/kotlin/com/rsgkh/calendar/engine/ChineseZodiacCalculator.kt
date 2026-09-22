@@ -4,11 +4,61 @@ package com.rsgkh.calendar.engine
 
 import kotlin.js.JsExport
 
+/**
+ * Standalone sexagenary (Ganzhi) calculations: day and hour pillars, the
+ * astrological solar calendar (year and month pillars), the Four Pillars
+ * (BaZi) and branch clashes.
+ *
+ * Day and hour pillars are pure arithmetic over the proleptic Gregorian
+ * calendar (1..9999). Year and month pillars depend on the 12 sectional solar
+ * terms (Jie) tabulated for 1900..2100 at the China Standard reference
+ * meridian (UTC+8); a transition takes effect at 00:00 of the term's civil
+ * date. The April bits are kept identical to ChineseLunisolarEngine's
+ * CN_TABLE Qingming days; tools/generate_solar_terms.py regenerates and
+ * validates this table, including the published almanac days for the
+ * near-midnight terms.
+ */
 @JsExport
 object ChineseZodiacCalculator {
 
-    init {
-        freezeValue(this)
+    const val MIN_SOLAR_YEAR = 1900
+    const val MAX_SOLAR_YEAR = 2100
+
+    // Base civil day per month for the 12 sectional terms (UTC+8):
+    // Jan Xiaohan, Feb Lichun, Mar Jingzhe, Apr Qingming, May Lixia, Jun Mangzhong,
+    // Jul Xiaoshu, Aug Liqiu, Sep Bailu, Oct Hanlu, Nov Lidong, Dec Daxue.
+    private val BASE_JIE_DAYS = intArrayOf(4, 3, 4, 4, 4, 4, 6, 6, 6, 7, 6, 6)
+
+    // Little-endian; 2 bits per month hold (day - base), 3 bytes per year,
+    // 603 bytes for 1900..2100. Verified against the published almanac record
+    // (Hong Kong Observatory tables) and the engine's CN_TABLE Qingming days.
+    private val SOLAR_JIE_TABLE: ByteArray by lazy {
+        decodeJieHex(
+            "669a6a66aaaaaaaeaabaefab6b9a6a66aaaaaaaaaabaefab6b9a6a66aaaaaaaaaa" +
+            "baefab6b9a6a66aaaa66aaaaaaaeab6a9a6666aa6a66aaaaaaaeab6a9a6666aa6a" +
+            "66aaaaaaaeab6a9a6666aa6a66aaaaaaaeaa6a9a56669a6a66aaaaaaaeaa6a9a56" +
+            "669a6a66aaaaaaaaaa6a9a56669a6a66aaaaaaaaaa6a9a56669a6a66aaaaaaaaaa" +
+            "6a9956669a6666aaaa66aaaa5a5956659a6666aaaa66aaaa5a5956659a6666aa6a" +
+            "66aaaa5a5956659a66669a6a66aaaa5a5955659a56669a6a66aaaa5a5955659a56" +
+            "669a6a66aaaa5a5555659a56669a6a66aaaa5a5555659956669a6a66aaaa1a5555" +
+            "655956669a6666aaaa1a5555655956669a6666aaaa165555555956659a66669a6a" +
+            "165555555955659a66669a6a165555555955659a56669a6a165555555555659a56" +
+            "669a6a165555555555659a56669a6a165555555555655956669a6a165555155555" +
+            "655956669a66165555155555655956669a66165555115555555956659a66164555" +
+            "115555555955659a66164515115555555555659a56164515115555555555659a56" +
+            "164515115555555555655956164515115555555555655956164515115555155555" +
+            "655956164511115555155555655956164511114555115555555955154511114555" +
+            "115555555555154511114515115555555555154501114515115555555555154501" +
+            "114515115555555555150401114515115555555555150401114511115555155555" +
+            "150401114511114555155555150401114511114555115555050400104511114555" +
+            "115555050000104511114515115555050000104501114515115555050000100501" +
+            "114515115555555555"
+        )
+    }
+
+    private fun decodeJieHex(hex: String): ByteArray {
+        require(hex.length == 603 * 2 && hex.all { it in '0'..'9' || it in 'a'..'f' }) { "Invalid solar terms table" }
+        return ByteArray(603) { hex.substring(it * 2, it * 2 + 2).toInt(16).toByte() }
     }
 
     /**
@@ -32,6 +82,80 @@ object ChineseZodiacCalculator {
     /** JDN calculation directly from the engine's GregorianDate model. */
     fun gregorianDateToJdn(date: GregorianDate): Int =
         gregorianToJdn(date.year, date.month, date.day)
+
+    /** Civil day of the month (UTC+8) on which a sectional solar term (Jie) begins. */
+    fun getSectionalTermDay(year: Int, month: Int): Int {
+        listOf(year, month).forEach(::requireInteger)
+        require(year in MIN_SOLAR_YEAR..MAX_SOLAR_YEAR) { "Year must be $MIN_SOLAR_YEAR..$MAX_SOLAR_YEAR" }
+        require(month in 1..12) { "Month must be 1..12" }
+        val i = (year - MIN_SOLAR_YEAR) * 3
+        val word = (SOLAR_JIE_TABLE[i].toInt() and 255) or
+            ((SOLAR_JIE_TABLE[i + 1].toInt() and 255) shl 8) or
+            ((SOLAR_JIE_TABLE[i + 2].toInt() and 255) shl 16)
+        return BASE_JIE_DAYS[month - 1] + ((word ushr ((month - 1) * 2)) and 3)
+    }
+
+    private fun requireSolarDate(year: Int, month: Int, day: Int) {
+        listOf(year, month, day).forEach(::requireInteger)
+        require(year in MIN_SOLAR_YEAR..MAX_SOLAR_YEAR) { "Year must be $MIN_SOLAR_YEAR..$MAX_SOLAR_YEAR" }
+        require(month in 1..12) { "Month must be 1..12" }
+        require(day in 1..daysInMonth(year, month)) { "Invalid Gregorian day" }
+    }
+
+    /**
+     * Calculates the Astrological Year Pillar. The astrological year changes
+     * at Lichun (early February), not on January 1 or the lunar new year.
+     */
+    fun getYearPillar(year: Int, month: Int, day: Int): GanzhiPillar {
+        requireSolarDate(year, month, day)
+        val lichunDay = getSectionalTermDay(year, 2)
+        val beforeLichun = month < 2 || (month == 2 && day < lichunDay)
+        val solarYear = if (beforeLichun) year - 1 else year
+        val stem = HeavenlyStem.fromIndex(floorMod(solarYear - 4, 10))
+        val branch = EarthlyBranch.fromIndex(floorMod(solarYear - 4, 12))
+        return GanzhiPillar(stem, branch)
+    }
+
+    fun getYearPillarForGregorianDate(date: GregorianDate): GanzhiPillar =
+        getYearPillar(date.year, date.month, date.day)
+
+    /**
+     * Calculates the Astrological Month Pillar from the 12 sectional solar
+     * terms and the classical "Five Tigers Seeking Month" rule (五虎遁月法).
+     */
+    fun getMonthPillar(year: Int, month: Int, day: Int): GanzhiPillar {
+        requireSolarDate(year, month, day)
+        val isPastTerm = day >= getSectionalTermDay(year, month)
+
+        // Astrological month offset (0 = Tiger month at Lichun ... 11 = Ox month at Xiaohan).
+        val monthOffset: Int
+        val solarYearForStem: Int
+        when {
+            month == 1 -> {
+                // January: before Xiaohan is the Rat month; from Xiaohan the Ox month, both of the prior solar year.
+                monthOffset = if (isPastTerm) 11 else 10
+                solarYearForStem = year - 1
+            }
+            month == 2 -> {
+                // February: from Lichun the Tiger month of the current solar year; before it the prior year's Ox month.
+                monthOffset = if (isPastTerm) 0 else 11
+                solarYearForStem = if (isPastTerm) year else year - 1
+            }
+            else -> {
+                monthOffset = if (isPastTerm) month - 2 else month - 3
+                solarYearForStem = year
+            }
+        }
+
+        val yearStemIndex = floorMod(solarYearForStem - 4, 10)
+        val baseMonthStem = floorMod((yearStemIndex % 5) * 2 + 2, 10)
+        val stem = HeavenlyStem.fromIndex(baseMonthStem + monthOffset)
+        val branch = EarthlyBranch.fromIndex(2 + monthOffset) // Month 0 is Yin (Tiger).
+        return GanzhiPillar(stem, branch)
+    }
+
+    fun getMonthPillarForGregorianDate(date: GregorianDate): GanzhiPillar =
+        getMonthPillar(date.year, date.month, date.day)
 
     /**
      * Computes the 60-day pillar (Ganzhi) for a Gregorian date.
@@ -76,7 +200,8 @@ object ChineseZodiacCalculator {
 
     /**
      * Computes the complete Hour Pillar for a Gregorian date and hour.
-     * Automatically rolls the day stem forward at 23:00 (late Rat hour).
+     * Automatically rolls the day stem forward at 23:00 (late Rat hour);
+     * the month and year pillars keep the calendar date.
      */
     fun getHourPillarForDate(year: Int, month: Int, day: Int, hourOfDay: Int): GanzhiPillar {
         requireInteger(hourOfDay)
@@ -90,4 +215,27 @@ object ChineseZodiacCalculator {
 
     fun getHourPillarForGregorianDate(date: GregorianDate, hourOfDay: Int): GanzhiPillar =
         getHourPillarForDate(date.year, date.month, date.day, hourOfDay)
+
+    /**
+     * Constructs the complete Four Pillars of Destiny (BaZi) and the four
+     * clash branches. Requires 1900..2100 (the solar term table's range).
+     */
+    fun getFourPillars(year: Int, month: Int, day: Int, hourOfDay: Int): FourPillars {
+        requireInteger(hourOfDay)
+        require(hourOfDay in 0..23) { "Hour must be 0..23, received $hourOfDay" }
+        return FourPillars(
+            getYearPillar(year, month, day),
+            getMonthPillar(year, month, day),
+            getDayPillar(year, month, day),
+            getHourPillarForDate(year, month, day, hourOfDay)
+        )
+    }
+
+    fun getFourPillarsForGregorianDate(date: GregorianDate, hourOfDay: Int): FourPillars =
+        getFourPillars(date.year, date.month, date.day, hourOfDay)
+
+    init {
+        // Freeze after all fields exist; freezing earlier breaks Kotlin/JS field assignment.
+        freezeValue(this)
+    }
 }

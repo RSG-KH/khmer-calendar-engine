@@ -47,6 +47,39 @@ export function getHourBranch(hourOfDay) {
   return zodiac.getHourBranch(hourOfDay);
 }
 
+/** Civil day of the month (UTC+8) on which a sectional solar term (Jie) begins, 1900..2100. */
+export function getSectionalTermDay(year, month) {
+  return zodiac.getSectionalTermDay(year, month);
+}
+
+/**
+ * Compute the astrological Year Pillar; the year changes at Lichun (early February).
+ * Accepts either (year, month, day) or a GregorianDate instance.
+ */
+export function getYearPillar(...args) {
+  if (args.length === 1 && args[0] instanceof GregorianDate) {
+    return zodiac.getYearPillarForGregorianDate(args[0]);
+  }
+  if (args.length === 3) {
+    return zodiac.getYearPillar(args[0], args[1], args[2]);
+  }
+  throw new TypeError(`getYearPillar expects 1 or 3 arguments, received ${args.length}`);
+}
+
+/**
+ * Compute the astrological Month Pillar from the sectional solar terms and the
+ * Five Tigers rule. Accepts either (year, month, day) or a GregorianDate instance.
+ */
+export function getMonthPillar(...args) {
+  if (args.length === 1 && args[0] instanceof GregorianDate) {
+    return zodiac.getMonthPillarForGregorianDate(args[0]);
+  }
+  if (args.length === 3) {
+    return zodiac.getMonthPillar(args[0], args[1], args[2]);
+  }
+  throw new TypeError(`getMonthPillar expects 1 or 3 arguments, received ${args.length}`);
+}
+
 /**
  * Compute the Chinese Day Pillar (Ganzhi and Zodiac Animal).
  * Accepts either (year, month, day) or a GregorianDate instance.
@@ -78,4 +111,18 @@ export function getHourPillar(...args) {
     return zodiac.getHourPillarForDate(args[0], args[1], args[2], args[3]);
   }
   throw new TypeError(`getHourPillar expects 2 or 4 arguments, received ${args.length}`);
+}
+
+/**
+ * Compute the complete Four Pillars (BaZi) with the four clash branches.
+ * Accepts (date: GregorianDate, hourOfDay) or (year, month, day, hourOfDay); 1900..2100.
+ */
+export function getFourPillars(...args) {
+  if (args.length === 2 && args[0] instanceof GregorianDate) {
+    return zodiac.getFourPillarsForGregorianDate(args[0], args[1]);
+  }
+  if (args.length === 4) {
+    return zodiac.getFourPillars(args[0], args[1], args[2], args[3]);
+  }
+  throw new TypeError(`getFourPillars expects 2 or 4 arguments, received ${args.length}`);
 }

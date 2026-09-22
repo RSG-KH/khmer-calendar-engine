@@ -23,6 +23,10 @@ const {
   getDayPillar,
   getHourBranch,
   getHourPillar,
+  getSectionalTermDay,
+  getYearPillar,
+  getMonthPillar,
+  getFourPillars,
 } = await import(pathToFileURL(packagePath).href);
 
 const engine = new KhmerCalendarEngine();
@@ -171,12 +175,56 @@ assert.throws(() => gregorianToJdn(2024, 2, 30));
 assert.throws(() => getDayPillar(2026, 1), TypeError);
 assert.throws(() => getHourPillar(2026, 1, 1), TypeError);
 
+// --- Chinese Ganzhi solar calendar (year/month pillars, Four Pillars) ---
+assert.equal(getSectionalTermDay(2025, 2), 3); // Lichun is not the constant Feb 4
+assert.equal(getSectionalTermDay(2024, 2), 4);
+assert.equal(getSectionalTermDay(2026, 9), 7); // Bailu
+assert.equal(getSectionalTermDay(1980, 2), 5); // published almanac day, near midnight
+assert.equal(getSectionalTermDay(1943, 4), 6); // equals CN_TABLE Qingming
+
+assert.equal(getYearPillar(2024, 2, 3).nameZh, '癸卯');
+assert.equal(getYearPillar(2024, 2, 4).nameZh, '甲辰');
+assert.equal(getYearPillar(2025, 2, 3).nameZh, '乙巳');
+assert.equal(getYearPillar(2026, 1, 15).nameZh, '乙巳');
+assert.equal(getYearPillar(2026, 2, 10).nameZh, '丙午');
+assert.equal(getYearPillar(new GregorianDate(2026, 2, 10)).animal, 'Horse');
+
+assert.equal(getMonthPillar(2024, 2, 10).nameZh, '丙寅');
+assert.equal(getMonthPillar(2026, 9, 22).nameZh, '丁酉');
+assert.equal(getMonthPillar(2026, 9, 6).nameZh, '丙申'); // day before Bailu
+assert.equal(getMonthPillar(2025, 2, 3).nameZh, '戊寅'); // Lichun day, Five Tigers
+assert.equal(getMonthPillar(2025, 2, 2).nameZh, '丁丑');
+
+const four = getFourPillars(2026, 9, 22, 12);
+assert.equal(four.year.nameZh, '丙午');
+assert.equal(four.month.nameZh, '丁酉');
+assert.equal(four.day.nameZh, '己亥');
+assert.equal(four.hour.nameZh, '庚午');
+assert.equal(four.yearClash, EarthlyBranch.ZI);
+assert.equal(four.monthClash, EarthlyBranch.MAO);
+assert.equal(four.dayClash, EarthlyBranch.SI);
+assert.equal(four.hourClash, EarthlyBranch.ZI);
+assert.equal(four.year.clashAnimal, 'Rat');
+const fourDate = getFourPillars(new GregorianDate(2026, 9, 22), 12);
+assert.equal(fourDate.day.nameZh, '己亥');
+
+for (const bad of [1899, 2101]) {
+  assert.throws(() => getYearPillar(bad, 6, 1));
+  assert.throws(() => getMonthPillar(bad, 6, 1));
+  assert.throws(() => getFourPillars(bad, 6, 1, 12));
+  assert.throws(() => getSectionalTermDay(bad, 6));
+}
+assert.throws(() => getYearPillar(2025, 2, 30));
+assert.throws(() => getFourPillars(2026, 1, 1), TypeError);
+assert.throws(() => { four.year = four.month; }, TypeError);
+
 console.log(JSON.stringify({
   days,
   years,
   occurrences,
   chineseFestivalEngine: 'verified',
   ganzhiCalculator: 'verified',
+  ganzhiSolarCalendar: 'verified',
   parity: 'passed',
   javascriptBoundaryChecks: 'passed',
 }, null, 2));

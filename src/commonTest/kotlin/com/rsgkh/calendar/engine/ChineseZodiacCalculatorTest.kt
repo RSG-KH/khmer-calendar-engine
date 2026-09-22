@@ -96,4 +96,104 @@ class ChineseZodiacCalculatorTest {
         assertFailsWith<IllegalArgumentException> { ChineseZodiacCalculator.getHourBranch(-1) }
         assertFailsWith<IllegalArgumentException> { ChineseZodiacCalculator.getHourBranch(24) }
     }
+
+    // --- 0.5.0: astrological solar calendar (year/month pillars, Four Pillars) ---
+
+    @Test
+    fun testSectionalTermAnchors() {
+        assertEquals(4, ChineseZodiacCalculator.getSectionalTermDay(2024, 2)) // Lichun
+        assertEquals(3, ChineseZodiacCalculator.getSectionalTermDay(2025, 2)) // not the constant Feb 4
+        assertEquals(4, ChineseZodiacCalculator.getSectionalTermDay(2026, 2))
+        assertEquals(7, ChineseZodiacCalculator.getSectionalTermDay(2026, 9)) // Bailu
+        assertEquals(5, ChineseZodiacCalculator.getSectionalTermDay(2025, 1)) // Xiaohan
+        // Published almanac days for near-midnight terms (HKO-verified).
+        assertEquals(5, ChineseZodiacCalculator.getSectionalTermDay(1980, 2))
+        assertEquals(6, ChineseZodiacCalculator.getSectionalTermDay(1943, 4)) // equals CN_TABLE
+        assertEquals(7, ChineseZodiacCalculator.getSectionalTermDay(1917, 12))
+        assertEquals(5, ChineseZodiacCalculator.getSectionalTermDay(2084, 6))
+        assertEquals(7, ChineseZodiacCalculator.getSectionalTermDay(1911, 5))
+    }
+
+    @Test
+    fun testLichunYearBoundaryTransitions() {
+        // 2024 Lichun fell on Feb 4; Feb 3 is still Gui-Mao (Water Rabbit).
+        assertEquals("癸卯", ChineseZodiacCalculator.getYearPillar(2024, 2, 3).nameZh)
+        assertEquals("Rabbit", ChineseZodiacCalculator.getYearPillar(2024, 2, 3).animal)
+        // On Lichun day itself the astrological year has changed.
+        assertEquals("甲辰", ChineseZodiacCalculator.getYearPillar(2024, 2, 4).nameZh)
+        assertEquals("Dragon", ChineseZodiacCalculator.getYearPillar(2024, 2, 5).animal)
+
+        // 2025 Lichun fell on Feb 3; the day before is still the prior year.
+        assertEquals("甲辰", ChineseZodiacCalculator.getYearPillar(2025, 2, 2).nameZh)
+        assertEquals("乙巳", ChineseZodiacCalculator.getYearPillar(2025, 2, 3).nameZh)
+
+        assertEquals("乙巳", ChineseZodiacCalculator.getYearPillar(2026, 1, 15).nameZh)
+        assertEquals("Snake", ChineseZodiacCalculator.getYearPillar(2026, 1, 15).animal)
+        assertEquals("丙午", ChineseZodiacCalculator.getYearPillar(2026, 2, 10).nameZh)
+        assertEquals("Horse", ChineseZodiacCalculator.getYearPillar(2026, 2, 10).animal)
+    }
+
+    @Test
+    fun testMonthPillarAndFiveTigersRule() {
+        // 2024-02-10: Jia-Chen year past Lichun; Tiger month stem on a Jia year is Bing.
+        val m2024 = ChineseZodiacCalculator.getMonthPillar(2024, 2, 10)
+        assertEquals("丙寅", m2024.nameZh)
+        assertEquals("Tiger", m2024.animal)
+
+        // 2026-09-22 is past Bailu (Sep 7); Rooster month on a Bing year: Geng base + 7 = Ding.
+        assertEquals("丁酉", ChineseZodiacCalculator.getMonthPillar(2026, 9, 22).nameZh)
+        // The day before Bailu is still the Monkey month.
+        assertEquals("丙申", ChineseZodiacCalculator.getMonthPillar(2026, 9, 6).nameZh)
+        assertEquals("丁酉", ChineseZodiacCalculator.getMonthPillar(2026, 9, 7).nameZh)
+
+        // 2025-02-03 is Lichun day: Tiger month of the new Yi-Si year (Wu stem base).
+        assertEquals("戊寅", ChineseZodiacCalculator.getMonthPillar(2025, 2, 3).nameZh)
+        // 2025-02-02 is still the Ox month of the Jia-Chen year (Bing base + 11 = Ding).
+        assertEquals("丁丑", ChineseZodiacCalculator.getMonthPillar(2025, 2, 2).nameZh)
+    }
+
+    @Test
+    fun testFullFourPillarsAndClashes() {
+        val pillars = ChineseZodiacCalculator.getFourPillars(2026, 9, 22, 12)
+
+        assertEquals("丙午", pillars.year.nameZh)
+        assertEquals(EarthlyBranch.WU, pillars.year.branch)
+        assertEquals(EarthlyBranch.ZI, pillars.yearClash) // Horse clashes with Rat
+        assertEquals("ជូត (Chuot)", pillars.year.clashKhmerAnimal)
+
+        assertEquals("丁酉", pillars.month.nameZh)
+        assertEquals(EarthlyBranch.YOU, pillars.month.branch)
+        assertEquals(EarthlyBranch.MAO, pillars.monthClash) // Rooster clashes with Rabbit
+
+        assertEquals("己亥", pillars.day.nameZh)
+        assertEquals(EarthlyBranch.HAI, pillars.day.branch)
+        assertEquals(EarthlyBranch.SI, pillars.dayClash) // Pig clashes with Snake
+
+        assertEquals("庚午", pillars.hour.nameZh)
+        assertEquals(EarthlyBranch.WU, pillars.hour.branch)
+        assertEquals(EarthlyBranch.ZI, pillars.hourClash) // Horse hour clashes with Rat
+    }
+
+    @Test
+    fun testQingmingDaysMatchChineseEngineTable() {
+        val engine = ChineseLunisolarEngine(FestivalProfile.CN_REFERENCE_UTC8)
+        for (year in 1900..2100) {
+            val iso = engine.getFestivalDates(year, "chinese_qingming_festival")[0]
+            val day = iso.substring(8, 10).toInt()
+            assertEquals(day, ChineseZodiacCalculator.getSectionalTermDay(year, 4), "Qingming $year")
+        }
+    }
+
+    @Test
+    fun testSolarRangeAndDateValidation() {
+        for (bad in listOf(1899, 2101)) {
+            assertFailsWith<IllegalArgumentException> { ChineseZodiacCalculator.getYearPillar(bad, 6, 1) }
+            assertFailsWith<IllegalArgumentException> { ChineseZodiacCalculator.getMonthPillar(bad, 6, 1) }
+            assertFailsWith<IllegalArgumentException> { ChineseZodiacCalculator.getFourPillars(bad, 6, 1, 12) }
+            assertFailsWith<IllegalArgumentException> { ChineseZodiacCalculator.getSectionalTermDay(bad, 6) }
+        }
+        assertFailsWith<IllegalArgumentException> { ChineseZodiacCalculator.getYearPillar(2025, 2, 30) }
+        assertFailsWith<IllegalArgumentException> { ChineseZodiacCalculator.getMonthPillar(2025, 13, 1) }
+        assertFailsWith<IllegalArgumentException> { ChineseZodiacCalculator.getSectionalTermDay(2024, 13) }
+    }
 }

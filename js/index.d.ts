@@ -4,7 +4,8 @@ import type {
   GregorianDate,
   HeavenlyStem,
   EarthlyBranch,
-  GanzhiPillar
+  GanzhiPillar,
+  FourPillars
 } from './kotlin/khmer-calendar-engine.mjs';
 export * from './kotlin/khmer-calendar-engine.mjs';
 
@@ -40,3 +41,14 @@ export function getHourBranch(hourOfDay: number): EarthlyBranch;
 export function getHourPillar(dayStem: HeavenlyStem, hourOfDay: number): GanzhiPillar;
 export function getHourPillar(date: GregorianDate, hourOfDay: number): GanzhiPillar;
 export function getHourPillar(year: number, month: number, day: number, hourOfDay: number): GanzhiPillar;
+
+export function getSectionalTermDay(year: number, month: number): number;
+
+export function getYearPillar(year: number, month: number, day: number): GanzhiPillar;
+export function getYearPillar(date: GregorianDate): GanzhiPillar;
+
+export function getMonthPillar(year: number, month: number, day: number): GanzhiPillar;
+export function getMonthPillar(date: GregorianDate): GanzhiPillar;
+
+export function getFourPillars(year: number, month: number, day: number, hourOfDay: number): FourPillars;
+export function getFourPillars(date: GregorianDate, hourOfDay: number): FourPillars;
