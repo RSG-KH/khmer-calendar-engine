@@ -140,10 +140,13 @@ const western = WesternZodiacCalculator.getInstance?.() ?? WesternZodiacCalculat
 export function calculateHoroscopeUtc(...args) {
   if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
     const o = args[0];
+    const secondUtc = o.secondUtc === undefined ? 0.0 : o.secondUtc;
+    const lat = o.latitudeDeg !== undefined ? o.latitudeDeg : o.latitude;
+    const lon = o.longitudeDeg !== undefined ? o.longitudeDeg : o.longitude;
     return western.calculateHoroscopeUtc(
       o.yearUtc, o.monthUtc, o.dayUtc,
-      o.hourUtc, o.minuteUtc, o.secondUtc ?? 0.0,
-      o.latitudeDeg ?? o.latitude, o.longitudeDeg ?? o.longitude
+      o.hourUtc, o.minuteUtc, secondUtc,
+      lat, lon
     );
   }
   return western.calculateHoroscopeUtc(...args);
@@ -159,11 +162,14 @@ export function calculateHoroscopeUtc(...args) {
 export function calculateHoroscope(...args) {
   if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
     const o = args[0];
+    const second = o.second === undefined ? 0.0 : o.second;
+    const lat = o.latitudeDeg !== undefined ? o.latitudeDeg : o.latitude;
+    const lon = o.longitudeDeg !== undefined ? o.longitudeDeg : o.longitude;
     return western.calculateHoroscope(
       o.year, o.month, o.day,
-      o.hour, o.minute, o.second ?? 0.0,
+      o.hour, o.minute, second,
       o.utcOffsetHours,
-      o.latitudeDeg ?? o.latitude, o.longitudeDeg ?? o.longitude
+      lat, lon
     );
   }
   return western.calculateHoroscope(...args);

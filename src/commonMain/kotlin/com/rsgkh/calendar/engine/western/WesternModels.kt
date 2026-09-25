@@ -128,11 +128,18 @@ data class WesternHoroscope(
     val ascendantStatus: AscendantStatus
 ) {
     init {
+        // Enforce genuine AscendantStatus enum membership (rejects null, fake duck-typed objects, or unknown values from JS)
+        require(AscendantStatus.entries.any { it === ascendantStatus }) {
+            "ascendantStatus must be a genuine AscendantStatus instance, received $ascendantStatus"
+        }
         // Enforce Ascendant nullability and status invariant consistency (R3-003)
-        if (ascendantStatus == AscendantStatus.CALCULATED || ascendantStatus == AscendantStatus.POLAR_NON_RISING) {
-            require(ascendant != null) { "ascendant must not be null when ascendantStatus is $ascendantStatus" }
-        } else {
-            require(ascendant == null) { "ascendant must be null when ascendantStatus is $ascendantStatus" }
+        when (ascendantStatus) {
+            AscendantStatus.CALCULATED, AscendantStatus.POLAR_NON_RISING -> {
+                require(ascendant != null) { "ascendant must not be null when ascendantStatus is $ascendantStatus" }
+            }
+            AscendantStatus.COINCIDENT_PLANES, AscendantStatus.DEGENERATE_POLE -> {
+                require(ascendant == null) { "ascendant must be null when ascendantStatus is $ascendantStatus" }
+            }
         }
         freezeValue(this)
     }

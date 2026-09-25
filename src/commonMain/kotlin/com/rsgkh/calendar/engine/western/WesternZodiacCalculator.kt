@@ -130,7 +130,7 @@ object WesternZodiacCalculator {
 
         // Reconcile floating-point rounding near day boundaries (e.g. UTC+1.1 at 01:06:00)
         if (utcSecondsInDay >= 86400.0 - 1e-9) {
-            utcSecondsInDay -= 86400.0
+            utcSecondsInDay = 0.0
             dayOffset += 1
         } else if (utcSecondsInDay < 0.0) {
             utcSecondsInDay += 86400.0
@@ -157,6 +157,10 @@ object WesternZodiacCalculator {
         } else if (sUtc < 0.0) {
             sUtc = 0.0
         }
+
+        hUtc = hUtc.coerceIn(0, 23)
+        mUtc = mUtc.coerceIn(0, 59)
+        sUtc = sUtc.coerceIn(0.0, 59.999999999999)
 
         val utcDate = localDate.plusDays(dayOffset)
         require(utcDate.year in 1800..2200) {

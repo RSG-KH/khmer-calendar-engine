@@ -240,4 +240,103 @@ class WesternZodiacCalculatorTest {
             WesternZodiacCalculator.calculateHoroscope(2026, 1, 1, 0, 0, 0.0, 14.1, 0.0, 0.0)
         }
     }
+
+    @Test
+    fun nearMidnightCarryAndBoundarySnapRegression() {
+        val lat = 11.5564
+        val lon = 104.9282
+
+        // 1. Zero offset near midnight carries to next day 00:00:00 UTC
+        val hZero = WesternZodiacCalculator.calculateHoroscope(
+            2026, 1, 2, 23, 59, 59.999999999, 0.0, lat, lon
+        )
+        val expZero = WesternZodiacCalculator.calculateHoroscopeUtc(
+            2026, 1, 3, 0, 0, 0.0, lat, lon
+        )
+        assertEquals(expZero.sun.totalLongitude, hZero.sun.totalLongitude, 1e-12)
+        assertEquals(expZero.moon.totalLongitude, hZero.moon.totalLongitude, 1e-12)
+        assertNotNull(expZero.ascendant)
+        assertNotNull(hZero.ascendant)
+        assertEquals(expZero.ascendant.totalLongitude, hZero.ascendant.totalLongitude, 1e-12)
+        assertEquals(expZero.midheaven.totalLongitude, hZero.midheaven.totalLongitude, 1e-12)
+        assertEquals(expZero.ascendantStatus, hZero.ascendantStatus)
+
+        // 2. Minus 1 offset: local 22:59:59.999999999 with UTC-1.0 normalizes to 23:59:59.999999999 UTC -> next day 00:00:00
+        val hMinus1 = WesternZodiacCalculator.calculateHoroscope(
+            2026, 1, 2, 22, 59, 59.999999999, -1.0, lat, lon
+        )
+        val expMinus1 = WesternZodiacCalculator.calculateHoroscopeUtc(
+            2026, 1, 3, 0, 0, 0.0, lat, lon
+        )
+        assertEquals(expMinus1.sun.totalLongitude, hMinus1.sun.totalLongitude, 1e-12)
+
+        // 3. Plus 1 offset: local 00:59:59.999999999 with UTC+1.0 normalizes to 23:59:59.999999999 of prev day -> 00:00:00 of same day
+        val hPlus1 = WesternZodiacCalculator.calculateHoroscope(
+            2026, 1, 2, 0, 59, 59.999999999, 1.0, lat, lon
+        )
+        val expPlus1 = WesternZodiacCalculator.calculateHoroscopeUtc(
+            2026, 1, 2, 0, 0, 0.0, lat, lon
+        )
+        assertEquals(expPlus1.sun.totalLongitude, hPlus1.sun.totalLongitude, 1e-12)
+
+        // 4. Month carry: Jan 31 -> Feb 1
+        val hMonth = WesternZodiacCalculator.calculateHoroscope(
+            2026, 1, 31, 23, 59, 59.999999999, 0.0, lat, lon
+        )
+        val expMonth = WesternZodiacCalculator.calculateHoroscopeUtc(
+            2026, 2, 1, 0, 0, 0.0, lat, lon
+        )
+        assertEquals(expMonth.sun.totalLongitude, hMonth.sun.totalLongitude, 1e-12)
+
+        // 5. Year carry: Dec 31 -> Jan 1 of next year
+        val hYear = WesternZodiacCalculator.calculateHoroscope(
+            2026, 12, 31, 23, 59, 59.999999999, 0.0, lat, lon
+        )
+        val expYear = WesternZodiacCalculator.calculateHoroscopeUtc(
+            2027, 1, 1, 0, 0, 0.0, lat, lon
+        )
+        assertEquals(expYear.sun.totalLongitude, hYear.sun.totalLongitude, 1e-12)
+
+        // 6. Supported year endpoint behavior: 2200-12-31 near-midnight snaps into 2201, which is outside 1800..2200
+        assertFailsWith<IllegalArgumentException> {
+            WesternZodiacCalculator.calculateHoroscope(
+                2200, 12, 31, 23, 59, 59.999999999, 0.0, lat, lon
+            )
+        }
+
+        // 7. Backward carry out of 1800: 1800-01-01 00:00:00 with offset +1.0 carries back into 1799
+        assertFailsWith<IllegalArgumentException> {
+            WesternZodiacCalculator.calculateHoroscope(
+                1800, 1, 1, 0, 0, 0.0, 1.0, lat, lon
+            )
+        }
+    }
+
+    @Test
+    fun horoscopeAscendantStatusContract() {
+        val sun = ZodiacPosition.fromLongitude(0.0)
+        val moon = ZodiacPosition.fromLongitude(60.0)
+        val asc = ZodiacPosition.fromLongitude(90.0)
+        val mc = ZodiacPosition.fromLongitude(270.0)
+
+        // CALCULATED and POLAR_NON_RISING require non-null ascendant
+        WesternHoroscope(sun, moon, asc, mc, false, AscendantStatus.CALCULATED)
+        WesternHoroscope(sun, moon, asc, mc, true, AscendantStatus.POLAR_NON_RISING)
+        assertFailsWith<IllegalArgumentException> {
+            WesternHoroscope(sun, moon, null, mc, false, AscendantStatus.CALCULATED)
+        }
+        assertFailsWith<IllegalArgumentException> {
+            WesternHoroscope(sun, moon, null, mc, true, AscendantStatus.POLAR_NON_RISING)
+        }
+
+        // COINCIDENT_PLANES and DEGENERATE_POLE require null ascendant
+        WesternHoroscope(sun, moon, null, mc, true, AscendantStatus.COINCIDENT_PLANES)
+        WesternHoroscope(sun, moon, null, mc, true, AscendantStatus.DEGENERATE_POLE)
+        assertFailsWith<IllegalArgumentException> {
+            WesternHoroscope(sun, moon, asc, mc, true, AscendantStatus.COINCIDENT_PLANES)
+        }
+        assertFailsWith<IllegalArgumentException> {
+            WesternHoroscope(sun, moon, asc, mc, true, AscendantStatus.DEGENERATE_POLE)
+        }
+    }
 }
