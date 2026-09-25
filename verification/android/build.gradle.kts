@@ -17,6 +17,6 @@ android {
 }
 
 dependencies {
-    implementation("com.rsgkh:khmer-calendar-engine-jvm:0.5.1")
+    implementation("com.rsgkh:khmer-calendar-engine-jvm:0.6.0")
     testImplementation("junit:junit:4.13.2")
 }

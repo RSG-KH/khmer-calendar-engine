@@ -279,6 +279,24 @@ The **1879 and 1897 entries remain historically unverified**. The exact 2012, 20
 
 [MetheaX/khmer-chhankitek-calendar at `4d1df001de73fac715d6e4c54f06f69618ff49dd`](https://github.com/MetheaX/khmer-chhankitek-calendar/tree/4d1df001de73fac715d6e4c54f06f69618ff49dd), MIT. Basis of the Kotlin lunar arithmetic, with lineage credited to Phylypo Tum and Thyrith Sor. Retain the original MIT license and attribution notices when incorporating these algorithms.
 
+### A03 — Jean Meeus, Astronomical Algorithms (2nd ed., 1998)
+
+Jean Meeus, *Astronomical Algorithms*, Willmann-Bell, 2nd English edition, 1998 (ISBN 0-943396-61-1). Basis of the Western astrology continuous coordinate algorithms in `MeeusEngine`:
+- Chapter 7: Julian Day Number calculation.
+- Chapter 12 & 13: Greenwich Mean and Apparent Sidereal Time (GMST/GAST) and Right Ascension of Midheaven (RAMC).
+- Chapter 22: Nutation in longitude ($\Delta\psi$) and obliquity of the ecliptic ($\epsilon$).
+- Chapter 25: Low-precision solar coordinates with aberration and nutation.
+- Chapter 47: Truncated 60-term lunar periodic series (Table 47.A) with planetary perturbations.
+- Ascendant scaled vector formulation avoiding division-by-zero singularities.
+
+### A04 — Fred Espenak & Jean Meeus, Delta-T Polynomial Expressions (2004/2006)
+
+Fred Espenak and Jean Meeus, *Five Millennium Canon of Solar Eclipses: -1999 to +3000*, NASA Technical Publication TP-2006-214141, October 2006. Complete 10-interval piecewise polynomial model for $\Delta T = \text{TT} - \text{UT1}$ in seconds, evaluated on fractional decimal years over 1800–2200 in `MeeusEngine.deltaTSeconds`.
+
+### A05 — Swiss Ephemeris 2.10 (Astrodienst)
+
+Swiss Ephemeris version 2.10.03 (Astrodienst AG), analytical Moshier backend (pure mathematical ephemeris mode without external JPL ephemeris files). Used as ground-truth reference for benchmarks B1–B8 over the supported interval 1800–2200 to establish angular error bounds: Sun $< 35''$ (observed $\le 31.95''$), Moon $< 10''$ (observed $\le 1.97''$), and Angles $< 10''$ (observed $\le 5.17''$).
+
 ## Validation still required
 
 1. Arrival times: while TVK national broadcast records provide 19 evidenced years (1997, 2009, 2010–2026 unbroken), obtaining the ministry's original printed Moha Sangkran almanac archive and internal computational algorithm (angular precision, meridian, rounding) remains an open research topic. Until then the per-year dataset carries the published clocks, and the estimate stays labeled as such.
