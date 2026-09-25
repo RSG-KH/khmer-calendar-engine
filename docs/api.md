@@ -1,6 +1,6 @@
 # API and calendar conventions
 
-Version **0.5.0** adds the astrological solar calendar — Lichun-anchored year pillars, sectional-term month pillars, the Four Pillars (BaZi) and clash branches; 0.4.0 added Chinese sexagenary cycle (Ganzhi) day and hour zodiac calculations; 0.3.0 added the New Year arrival estimate; 0.1.0 established the API and 0.2.0 added recurrence rules and the Chinese lunisolar engine. Kotlin and Java use package `com.rsgkh.calendar.engine`; JavaScript uses named exports from `khmer-calendar-engine`. Results contain facts and indices; applications supply translations and display formatting.
+Version **0.5.1** hardens JavaScript validation, isolates the festival registry, and synchronizes Four Pillars day-hour alignment at 23:00; 0.5.0 added the astrological solar calendar — Lichun-anchored year pillars, sectional-term month pillars, the Four Pillars (BaZi) and clash branches; 0.4.0 added Chinese sexagenary cycle (Ganzhi) day and hour zodiac calculations; 0.3.0 added the New Year arrival estimate; 0.1.0 established the API and 0.2.0 added recurrence rules and the Chinese lunisolar engine. Kotlin and Java use package `com.rsgkh.calendar.engine`; JavaScript uses named exports from `khmer-calendar-engine`. Results contain facts and indices; applications supply translations and display formatting.
 
 ## Dates
 

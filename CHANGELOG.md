@@ -85,6 +85,7 @@ Initial release: one Kotlin Multiplatform implementation, compiled into an Andro
 - JavaScript object-argument rule construction (`createRule`).
 - GitHub release workflow: builds, tests and publishes JVM, JavaScript and Maven ZIP assets from a matching version tag; cross-target parity verified across all 146,462 supported dates and 401 New Year results.
 
+[0.5.1]: https://github.com/RSG-KH/khmer-calendar-engine/releases/tag/v0.5.1
 [0.5.0]: https://github.com/RSG-KH/khmer-calendar-engine/releases/tag/v0.5.0
 [0.4.0]: https://github.com/RSG-KH/khmer-calendar-engine/releases/tag/v0.4.0
 [0.3.0]: https://github.com/RSG-KH/khmer-calendar-engine/releases/tag/v0.3.0
