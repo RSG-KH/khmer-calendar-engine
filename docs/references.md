@@ -295,7 +295,7 @@ Fred Espenak and Jean Meeus, *Five Millennium Canon of Solar Eclipses: -1999 to 
 
 ### A05 — Swiss Ephemeris 2.10 (Astrodienst)
 
-Swiss Ephemeris version 2.10.03 (Astrodienst AG), analytical Moshier backend (pure mathematical ephemeris mode without external JPL ephemeris files). Used as ground-truth reference for benchmarks B1–B8 over the supported interval 1800–2200 to establish angular error bounds: Sun $< 35''$ (observed $\le 31.95''$), Moon $< 10''$ (observed $\le 1.97''$), and Angles $< 10''$ (observed $\le 5.17''$).
+The recorded reference comparison used PySwissEph 2.10.3.2 with Swiss Ephemeris 2.10.03 (Astrodienst AG). Its script passed `FLG_MOSEPH` (value 4) to `swe.calc` and checked the returned flag; it made no model-override call. For modern dated fixtures it called `swe.utc_to_jd` to obtain TT for Sun/Moon positions and UT1 for `swe.houses_ex` angles. The 1900 fixture used UT1 rather than labeling that input historical UTC. The exact script and output are retained in the adjacent research archive under `big3-round3-review/tests/compare_reference.py` and `big3-round3-review/results/reference_comparison.json`. B4 and B5 are geometric Ascendant checks. The B1–B8 residuals are observations at sampled inputs, not whole-range error bounds. The benchmark record does not establish a selected IAU 1980 nutation model. See the [Swiss Ephemeris flag declarations](https://raw.githubusercontent.com/aloistr/swisseph/master/swephexp.h) and [time-conversion documentation](https://www.astro.com/swisseph/swephprg.htm).
 
 ## Validation still required
 

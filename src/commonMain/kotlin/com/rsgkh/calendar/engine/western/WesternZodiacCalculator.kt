@@ -158,9 +158,12 @@ object WesternZodiacCalculator {
             sUtc = 0.0
         }
 
-        hUtc = hUtc.coerceIn(0, 23)
-        mUtc = mUtc.coerceIn(0, 59)
-        sUtc = sUtc.coerceIn(0.0, 59.999999999999)
+        // A bad normalization must fail visibly instead of becoming a plausible clock.
+        check(hUtc in 0..23) { "Normalized UTC hour is out of range: $hUtc" }
+        check(mUtc in 0..59) { "Normalized UTC minute is out of range: $mUtc" }
+        check(sUtc.isFinite() && sUtc >= 0.0 && sUtc < 60.0) {
+            "Normalized UTC second is out of range: $sUtc"
+        }
 
         val utcDate = localDate.plusDays(dayOffset)
         require(utcDate.year in 1800..2200) {

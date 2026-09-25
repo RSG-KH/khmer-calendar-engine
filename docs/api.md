@@ -138,9 +138,5 @@ calculateHoroscope({
    - 60-term truncated lunar periodic series from Table 47.A with nutation (Ch. 47).
    - Scaled vector Ascendant formulation with singularity detection.
 2. **Delta-T ($\Delta T$):** Full 10-interval piecewise polynomial model from Fred Espenak & Jean Meeus (2004/2006, *Five Millennium Canon of Solar Eclipses*) evaluated on fractional decimal years over 1800–2200.
-3. **Accuracy Benchmarks (vs. Swiss Ephemeris analytical Moshier backend):**
-   - Sun longitude: error $< 35''$ across all benchmarks (observed $\le 31.95''$).
-   - Moon longitude: error $< 10''$ across all benchmarks (observed $\le 1.97''$).
-   - Angles (Ascendant & Midheaven): error $< 10''$ (observed $\le 5.17''$).
+3. **Accuracy Benchmarks (vs. Swiss Ephemeris analytical Moshier backend):** In the named B1–B8 fixtures, the observed Sun residual is $\le 31.95''$, Moon residual $\le 1.97''$, and angle residual $\le 5.17''$. These are sampled comparisons, not maximum error guarantees throughout 1800–2200. Formula comparisons require matched TT for the Sun and Moon and matched UT1 and frame conventions for the angles. Civil-input results also depend on the engine's time-scale approximation and the supplied time and location; near a sign boundary, different numerical or time models can produce different signs.
 4. **Host Responsibilities:** The engine is purely astronomical; host applications are strictly responsible for resolving timezones, historical Daylight Saving Time (DST), and geographical coordinates before passing civil time and decimal UTC offset into the engine.
-
