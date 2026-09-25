@@ -1,5 +1,6 @@
 package com.rsgkh.calendar.engine
 
+import com.rsgkh.calendar.engine.western.WesternZodiacCalculator
 import java.nio.file.Files
 import java.nio.file.Path
 import java.security.MessageDigest
@@ -60,6 +61,33 @@ class CompatibilityTest {
                 )
                 for (rule in rules) for (occurrence in engine.evaluateRule(year, rule)) {
                     out.appendLine("R\t$year\t${rule.id}\t${occurrence.date.iso}")
+                }
+            }
+            // Compare the four Western positions and angle status across compiled targets.
+            // Decade samples cover the supported range; 2026 covers the current fixtures.
+            val locations = listOf(
+                0.0 to 0.0,
+                11.5564 to 104.9282,
+                -33.8688 to 151.2093,
+                51.5072 to -0.1276,
+                66.56 to 25.0,
+                -66.56 to -25.0,
+                90.0 to 180.0,
+                -90.0 to -180.0,
+            )
+            for (year in ((1800..2200 step 10).toList() + 2026).sorted()) {
+                for (month in 1..12) for ((latitude, longitude) in locations) {
+                    val chart = WesternZodiacCalculator.calculateHoroscopeUtc(
+                        year, month, 15, 12, 34, 56.789, latitude, longitude
+                    )
+                    out.appendLine(listOf(
+                        "W", year, month, 15, 12, 34, 56.789, latitude, longitude,
+                        chart.sun.totalLongitude, chart.moon.totalLongitude,
+                        chart.ascendant?.totalLongitude ?: "null", chart.midheaven.totalLongitude,
+                        chart.sun.sign.index, chart.moon.sign.index,
+                        chart.ascendant?.sign?.index ?: "null", chart.midheaven.sign.index,
+                        chart.isPolarLatitude, chart.ascendantStatus.code
+                    ).joinToString("\t"))
                 }
             }
         }

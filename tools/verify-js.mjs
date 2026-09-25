@@ -46,7 +46,7 @@ const rules = {
   last: createRule({ id: 'last', type: 'new_year_last' }),
 };
 const recurrence = new Map();
-let days = 0, years = 0, occurrences = 0;
+let days = 0, years = 0, occurrences = 0, westernCharts = 0;
 for (const row of readFileSync(baselinePath, 'utf8').trim().split(/\r?\n/)) {
   const fields = row.split('\t');
   if (fields[0] === 'D') {
@@ -68,10 +68,33 @@ for (const row of readFileSync(baselinePath, 'utf8').trim().split(/\r?\n/)) {
     if (!recurrence.has(key)) recurrence.set(key, []);
     recurrence.get(key).push(fields[3]);
     occurrences++;
+  } else if (fields[0] === 'W') {
+    assert.equal(fields.length, 19, 'Western baseline column count');
+    const [year, month, day, hour, minute, second, latitude, longitude] = fields.slice(1, 9).map(Number);
+    const chart = calculateHoroscopeUtc(year, month, day, hour, minute, second, latitude, longitude);
+    const label = `${year}-${month}-${day} ${latitude},${longitude}`;
+    for (const [position, longitudeField, signField] of [
+      [chart.sun, 9, 13], [chart.moon, 10, 14],
+      [chart.ascendant, 11, 15], [chart.midheaven, 12, 16],
+    ]) {
+      if (fields[longitudeField] === 'null') {
+        assert.equal(position, null, label);
+        assert.equal(fields[signField], 'null', label);
+      } else {
+        assert.notEqual(position, null, label);
+        const difference = Math.abs(position.totalLongitude - Number(fields[longitudeField])) % 360;
+        assert.ok(Math.min(difference, 360 - difference) < 1e-9, `${label}: longitude differs`);
+        assert.equal(position.sign.index, Number(fields[signField]), `${label}: sign differs`);
+      }
+    }
+    assert.equal(String(chart.isPolarLatitude), fields[17], `${label}: polar flag differs`);
+    assert.equal(chart.ascendantStatus.code, fields[18], `${label}: Ascendant status differs`);
+    westernCharts++;
   } else assert.fail(`Unknown baseline record: ${fields[0]}`);
 }
 assert.equal(days, 146462);
 assert.equal(years, 401);
+assert.equal(westernCharts, 4032);
 for (let year = 1800; year <= 2200; year++) for (const [id, rule] of Object.entries(rules)) {
   assert.deepEqual(engine.evaluateRule(year, rule).map(v => v.date.iso), recurrence.get(`${year}/${id}`) ?? [], `${year}/${id}`);
 }
@@ -255,6 +278,7 @@ console.log(JSON.stringify({
   days,
   years,
   occurrences,
+  westernCrossTargetCharts: westernCharts,
   chineseFestivalEngine: 'verified',
   ganzhiCalculator: 'verified',
   ganzhiSolarCalendar: 'verified',

@@ -84,5 +84,6 @@ jobs:
             build/repository
             build/reports/tests
             build/reports/browser-verification.json
+            build/reports/western-*.json
             verification/android/build/reports/tests
           if-no-files-found: error

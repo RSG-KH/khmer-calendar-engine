@@ -8,5 +8,5 @@
     "noEmit": true,
     "skipLibCheck": false
   },
-  "include": ["main.ts"]
+  "include": ["main.ts", "coordinate-contract.ts"]
 }

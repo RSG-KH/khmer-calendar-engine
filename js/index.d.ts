@@ -57,20 +57,20 @@ export function getMonthPillar(date: GregorianDate): GanzhiPillar;
 export function getFourPillars(year: number, month: number, day: number, hourOfDay: number): FourPillars;
 export function getFourPillars(date: GregorianDate, hourOfDay: number): FourPillars;
 
-export interface HoroscopeUtcOptions {
+type HoroscopeCoordinates =
+  ({ latitudeDeg: number; latitude?: number } | { latitudeDeg?: number; latitude: number }) &
+  ({ longitudeDeg: number; longitude?: number } | { longitudeDeg?: number; longitude: number });
+
+export type HoroscopeUtcOptions = HoroscopeCoordinates & {
   yearUtc: number;
   monthUtc: number;
   dayUtc: number;
   hourUtc: number;
   minuteUtc: number;
   secondUtc?: number;
-  latitudeDeg?: number;
-  latitude?: number;
-  longitudeDeg?: number;
-  longitude?: number;
-}
+};
 
-export interface HoroscopeOptions {
+export type HoroscopeOptions = HoroscopeCoordinates & {
   year: number;
   month: number;
   day: number;
@@ -78,11 +78,7 @@ export interface HoroscopeOptions {
   minute: number;
   second?: number;
   utcOffsetHours: number;
-  latitudeDeg?: number;
-  latitude?: number;
-  longitudeDeg?: number;
-  longitude?: number;
-}
+};
 
 export function calculateHoroscopeUtc(options: HoroscopeUtcOptions): WesternHoroscope;
 export function calculateHoroscopeUtc(
@@ -108,4 +104,3 @@ export function calculateHoroscope(
   latitudeDeg: number,
   longitudeDeg: number
 ): WesternHoroscope;
-

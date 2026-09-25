@@ -89,4 +89,8 @@ val verifyJs = tasks.register<Exec>("verifyJs") {
     dependsOn("jvmTest", packageJs)
     commandLine("node", "tools/verify-js.mjs")
 }
-tasks.named("check") { dependsOn(verifyJs) }
+val verifyWesternJs = tasks.register<Exec>("verifyWesternJs") {
+    dependsOn(packageJs)
+    commandLine("node", "tools/verify-western-regressions.mjs")
+}
+tasks.named("check") { dependsOn(verifyJs, verifyWesternJs) }
