@@ -2,6 +2,21 @@
 
 All notable changes to the Khmer Calendar Engine. Versions are published as GitHub releases (see [docs/releasing.md](docs/releasing.md)); each heading links to its release.
 
+## [0.6.0] — 2026-09-25
+
+Western astrology ("Big 3" + Angles: Sun, Moon, Ascendant, Midheaven) engine.
+
+### Added
+
+- `WesternZodiacCalculator`: Continuous-time celestial coordinate calculation for Sun, Moon, Ascendant, and Midheaven (MC) in the tropical zodiac across 1800–2200, based on Jean Meeus (*Astronomical Algorithms*, 2nd ed.) with pure Kotlin implementation (zero runtime dependencies).
+- Models `WesternHoroscope`, `ZodiacPosition`, `WesternZodiacSign` (Aries through Pisces with English/Khmer names, symbols, elements, and modalities), and `AscendantStatus`.
+- Piecewise Delta-T ($\Delta T$) model covering 10 polynomial intervals from Fred Espenak & Jean Meeus (2004/2006, *Five Millennium Canon of Solar Eclipses*) evaluated on fractional decimal years over 1800–2200.
+- Scaled vector Ascendant formulation with singularity detection: detects coincident horizon and ecliptic planes ($r^2 < 10^{-10}$) returning `(null, AscendantStatus.COINCIDENT_PLANES)` in both Northern and Southern hemisphere configurations, and geographic pole conditions returning `(null, AscendantStatus.DEGENERATE_POLE)`.
+- Strict primitive number guard `requireFiniteDouble` implemented across JVM and JS targets, rejecting non-finite numbers and JS type coercions before arithmetic.
+- Bounded UTC normalization with carry reconciliation (`R3-004`), preventing floating-point hour leaps across day boundaries under fractional UTC offsets (e.g., UTC+1.1 at 01:06:00).
+- JavaScript/TypeScript ergonomic options-object wrapper `calculateHoroscope({ year, month, day, hour, minute, second?, utcOffsetHours, latitude, longitude })` alongside positional methods.
+- Full test coverage: `WesternZodiacCalculatorTest` with Swiss Ephemeris ground-truth benchmarks B1–B8, and `Round3RegressionTest`.
+
 ## [0.5.1] — 2026-09-25
 
 Maintenance release: Four Pillars day-hour synchronization, festival registry isolation, and JavaScript runtime validation hardening.
@@ -85,6 +100,7 @@ Initial release: one Kotlin Multiplatform implementation, compiled into an Andro
 - JavaScript object-argument rule construction (`createRule`).
 - GitHub release workflow: builds, tests and publishes JVM, JavaScript and Maven ZIP assets from a matching version tag; cross-target parity verified across all 146,462 supported dates and 401 New Year results.
 
+[0.6.0]: https://github.com/RSG-KH/khmer-calendar-engine/releases/tag/v0.6.0
 [0.5.1]: https://github.com/RSG-KH/khmer-calendar-engine/releases/tag/v0.5.1
 [0.5.0]: https://github.com/RSG-KH/khmer-calendar-engine/releases/tag/v0.5.0
 [0.4.0]: https://github.com/RSG-KH/khmer-calendar-engine/releases/tag/v0.4.0

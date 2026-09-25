@@ -5,7 +5,11 @@ import type {
   HeavenlyStem,
   EarthlyBranch,
   GanzhiPillar,
-  FourPillars
+  FourPillars,
+  WesternHoroscope,
+  WesternZodiacSign,
+  ZodiacPosition,
+  AscendantStatus
 } from './kotlin/khmer-calendar-engine.mjs';
 export * from './kotlin/khmer-calendar-engine.mjs';
 
@@ -52,3 +56,56 @@ export function getMonthPillar(date: GregorianDate): GanzhiPillar;
 
 export function getFourPillars(year: number, month: number, day: number, hourOfDay: number): FourPillars;
 export function getFourPillars(date: GregorianDate, hourOfDay: number): FourPillars;
+
+export interface HoroscopeUtcOptions {
+  yearUtc: number;
+  monthUtc: number;
+  dayUtc: number;
+  hourUtc: number;
+  minuteUtc: number;
+  secondUtc?: number;
+  latitudeDeg?: number;
+  latitude?: number;
+  longitudeDeg?: number;
+  longitude?: number;
+}
+
+export interface HoroscopeOptions {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+  second?: number;
+  utcOffsetHours: number;
+  latitudeDeg?: number;
+  latitude?: number;
+  longitudeDeg?: number;
+  longitude?: number;
+}
+
+export function calculateHoroscopeUtc(options: HoroscopeUtcOptions): WesternHoroscope;
+export function calculateHoroscopeUtc(
+  yearUtc: number,
+  monthUtc: number,
+  dayUtc: number,
+  hourUtc: number,
+  minuteUtc: number,
+  secondUtc: number | undefined,
+  latitudeDeg: number,
+  longitudeDeg: number
+): WesternHoroscope;
+
+export function calculateHoroscope(options: HoroscopeOptions): WesternHoroscope;
+export function calculateHoroscope(
+  year: number,
+  month: number,
+  day: number,
+  hour: number,
+  minute: number,
+  second: number | undefined,
+  utcOffsetHours: number,
+  latitudeDeg: number,
+  longitudeDeg: number
+): WesternHoroscope;
+

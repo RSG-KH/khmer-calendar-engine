@@ -1,6 +1,6 @@
 # API and calendar conventions
 
-Version **0.5.1** hardens JavaScript validation, isolates the festival registry, and synchronizes Four Pillars day-hour alignment at 23:00; 0.5.0 added the astrological solar calendar — Lichun-anchored year pillars, sectional-term month pillars, the Four Pillars (BaZi) and clash branches; 0.4.0 added Chinese sexagenary cycle (Ganzhi) day and hour zodiac calculations; 0.3.0 added the New Year arrival estimate; 0.1.0 established the API and 0.2.0 added recurrence rules and the Chinese lunisolar engine. Kotlin and Java use package `com.rsgkh.calendar.engine`; JavaScript uses named exports from `khmer-calendar-engine`. Results contain facts and indices; applications supply translations and display formatting.
+Version **0.6.0** adds the Western astrology ("Big 3" + Angles: Sun, Moon, Ascendant, Midheaven) engine based on Jean Meeus algorithms and Espenak & Meeus piecewise Delta-T (1800–2200); 0.5.1 hardened JavaScript validation, isolated the festival registry, and synchronized Four Pillars day-hour alignment at 23:00; 0.5.0 added the astrological solar calendar — Lichun-anchored year pillars, sectional-term month pillars, the Four Pillars (BaZi) and clash branches; 0.4.0 added Chinese sexagenary cycle (Ganzhi) day and hour zodiac calculations; 0.3.0 added the New Year arrival estimate; 0.1.0 established the API and 0.2.0 added recurrence rules and the Chinese lunisolar engine. Kotlin and Java use package `com.rsgkh.calendar.engine` (and `com.rsgkh.calendar.engine.western`); JavaScript uses named exports from `khmer-calendar-engine`. Results contain facts and indices; applications supply translations and display formatting.
 
 ## Dates
 
@@ -98,3 +98,49 @@ Every `EarthlyBranch` and `GanzhiPillar` also exposes `clashBranch`, `clashAnima
 3. **The 23:00 Zi Hour Rollover:** In traditional Chinese timekeeping, the early Rat (*Zi*, 子) hour begins at 23:00. `getHourPillarForDate` automatically advances the effective day stem by +1 day when `hourOfDay == 23`. Callers using the primitive `getHourPillar(dayStem, hourOfDay)` are expected to pass tomorrow's stem if evaluating at 23:00.
 4. **Astrological year and month boundaries (UTC+8):** Year pillars change at *Lichun* and month pillars at the 12 sectional terms (*Jie*), tabulated for 1900..2100 at the China Standard reference meridian (UTC+8) — the standard *Tong Shu* / BaZi convention, kept identical for Qingming to the Chinese lunisolar engine's `cn-reference-utc8` data. Term days follow the published almanac record (Hong Kong Observatory tables); for terms falling within a few minutes of UTC+8 midnight the published day is stored, which for 15 terms differs from a raw modern recomputation. `tools/generate_solar_terms.py` regenerates and validates the table, including that Qingming equality.
 5. **Day-boundary transitions:** A solar-term transition takes effect at 00:00 of the term's civil date — the civil calendar day model, not minute-level natal-chart casting. Within `getFourPillars`, only the day and hour pillars roll at 23:00; the year and month pillars keep the calendar date.
+
+## Western astrology ("Big 3" + Angles)
+
+The standalone `WesternZodiacCalculator` calculates continuous-time celestial coordinates for Western natal astrology: the **"Big 3"** (Sun sign, Moon sign, Ascendant) plus Midheaven (MC), expressed in tropical ecliptic coordinates across the supported interval **1800–2200**.
+
+| Operation | Input parameters | Result |
+| --- | --- | --- |
+| `calculateHoroscopeUtc(...)` | `yearUtc, monthUtc, dayUtc, hourUtc, minuteUtc, secondUtc = 0, latitudeDeg, longitudeDeg` | `WesternHoroscope`: Sun, Moon, Ascendant, Midheaven, polar flag, and `AscendantStatus` |
+| `calculateHoroscope(...)` | `year, month, day, hour, minute, second = 0, utcOffsetHours, latitudeDeg, longitudeDeg` | `WesternHoroscope`: Normalized UTC horoscope with floating-point carry reconciliation |
+
+In JavaScript/TypeScript, `calculateHoroscope` and `calculateHoroscopeUtc` are exported both as positional functions and as ergonomic single options-object functions:
+```typescript
+calculateHoroscope({
+  year: 2026, month: 4, day: 14,
+  hour: 10, minute: 30, second: 0,
+  utcOffsetHours: 7.0,
+  latitude: 11.5564, longitude: 104.9282
+})
+```
+
+### Models and Data Structures
+
+- `WesternZodiacSign`: Enum of the 12 signs (`ARIES` .. `PISCES`) with `index` (0..11), `symbol` (♈..♓), `englishName`, `khmerName` (មេស..មីន), `element` (Fire, Earth, Air, Water), and `modality` (Cardinal, Fixed, Mutable).
+- `ZodiacPosition`: Represents celestial position with `sign`, `degreeInSign` ($[0, 30)$), `wholeDegree` ($0..29$), `minute` ($0..59$), `second` ($[0, 60)$), `totalLongitude` ($[0, 360)$), and `formatted` string (e.g. `Aries 24° 12' 13"`).
+- `WesternHoroscope`: Contains `sun`, `moon`, nullable `ascendant`, `midheaven`, `isPolarLatitude` (`Boolean`), and `ascendantStatus` (`AscendantStatus`).
+- `AscendantStatus`: Enum describing the state of the horizon intersection:
+  - `CALCULATED`: Normal unique rising horizon intersection ($|\phi| < 90^\circ - \epsilon$).
+  - `POLAR_NON_RISING`: Polar latitude ($|\phi| \ge 90^\circ - \epsilon$) where ecliptic does not set; Ascendant represents geometric intersection.
+  - `COINCIDENT_PLANES`: Ecliptic and horizon planes coincide ($r^2 < 10^{-10}$ at $\text{RAMC}=270^\circ, \phi=+(90^\circ-\epsilon)$ or $\text{RAMC}=90^\circ, \phi=-(90^\circ-\epsilon)$); `ascendant` is `null`.
+  - `DEGENERATE_POLE`: Exact geographic pole ($|\phi| \ge 89.99^\circ$); diurnal rotation is parallel to horizon; `ascendant` is `null`.
+
+### Computational Algorithms & Accuracy
+
+1. **Algorithms:** Implementation is pure Kotlin with zero runtime dependencies, based on Jean Meeus (*Astronomical Algorithms*, 2nd ed.):
+   - True obliquity and nutation in longitude (Ch. 22).
+   - Greenwich Apparent Sidereal Time (GAST) and local RAMC (Ch. 12 & 13).
+   - Low-precision solar coordinates with nutation and aberration (Ch. 25).
+   - 60-term truncated lunar periodic series from Table 47.A with nutation (Ch. 47).
+   - Scaled vector Ascendant formulation with singularity detection.
+2. **Delta-T ($\Delta T$):** Full 10-interval piecewise polynomial model from Fred Espenak & Jean Meeus (2004/2006, *Five Millennium Canon of Solar Eclipses*) evaluated on fractional decimal years over 1800–2200.
+3. **Accuracy Benchmarks (vs. Swiss Ephemeris analytical Moshier backend):**
+   - Sun longitude: error $< 35''$ across all benchmarks (observed $\le 31.95''$).
+   - Moon longitude: error $< 10''$ across all benchmarks (observed $\le 1.97''$).
+   - Angles (Ascendant & Midheaven): error $< 10''$ (observed $\le 5.17''$).
+4. **Host Responsibilities:** The engine is purely astronomical; host applications are strictly responsible for resolving timezones, historical Daylight Saving Time (DST), and geographical coordinates before passing civil time and decimal UTC offset into the engine.
+

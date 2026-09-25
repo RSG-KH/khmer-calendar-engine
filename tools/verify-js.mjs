@@ -27,6 +27,13 @@ const {
   getYearPillar,
   getMonthPillar,
   getFourPillars,
+  WesternZodiacCalculator,
+  WesternZodiacSign,
+  ZodiacPosition,
+  WesternHoroscope,
+  AscendantStatus,
+  calculateHoroscope,
+  calculateHoroscopeUtc,
 } = await import(pathToFileURL(packagePath).href);
 
 const engine = new KhmerCalendarEngine();
@@ -218,6 +225,32 @@ assert.throws(() => getYearPillar(2025, 2, 30));
 assert.throws(() => getFourPillars(2026, 1, 1), TypeError);
 assert.throws(() => { four.year = four.month; }, TypeError);
 
+// --- Western Astrology (Big 3 + Angles) JS Verification ---
+const b1Utc = calculateHoroscopeUtc(2026, 4, 14, 3, 30, 0, 11.5564, 104.9282);
+assert.equal(b1Utc.sun.sign, WesternZodiacSign.ARIES);
+assert.equal(b1Utc.moon.sign, WesternZodiacSign.PISCES);
+assert.equal(b1Utc.ascendant.sign, WesternZodiacSign.CANCER);
+assert.equal(b1Utc.midheaven.sign, WesternZodiacSign.PISCES);
+assert.equal(b1Utc.ascendantStatus, AscendantStatus.CALCULATED);
+assert(Object.isFrozen(b1Utc));
+assert(Object.isFrozen(b1Utc.sun));
+
+// Options-object overload
+const b1Local = calculateHoroscope({
+  year: 2026, month: 4, day: 14,
+  hour: 10, minute: 30, second: 0,
+  utcOffsetHours: 7.0,
+  latitude: 11.5564, longitude: 104.9282
+});
+assert.equal(b1Local.sun.sign, WesternZodiacSign.ARIES);
+assert.equal(b1Local.moon.sign, WesternZodiacSign.PISCES);
+assert.equal(b1Local.ascendant.sign, WesternZodiacSign.CANCER);
+assert(Math.abs(b1Local.sun.totalLongitude - b1Utc.sun.totalLongitude) < 1e-9);
+
+// Reject malformed inputs
+assert.throws(() => calculateHoroscopeUtc(2026, 4, 14, 3, 30, NaN, 11.5564, 104.9282));
+assert.throws(() => calculateHoroscope(2026, 4, 14, 10, 30, 0, 'bad', 11.5564, 104.9282));
+
 console.log(JSON.stringify({
   days,
   years,
@@ -225,6 +258,7 @@ console.log(JSON.stringify({
   chineseFestivalEngine: 'verified',
   ganzhiCalculator: 'verified',
   ganzhiSolarCalendar: 'verified',
+  westernAstrology: 'verified',
   parity: 'passed',
   javascriptBoundaryChecks: 'passed',
 }, null, 2));

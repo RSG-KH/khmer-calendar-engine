@@ -4,6 +4,7 @@ import {
   ChineseLunisolarEngine,
   FestivalProfile,
   ChineseZodiacCalculator,
+  WesternZodiacCalculator,
   GregorianDate
 } from './kotlin/khmer-calendar-engine.mjs';
 export * from './kotlin/khmer-calendar-engine.mjs';
@@ -126,3 +127,45 @@ export function getFourPillars(...args) {
   }
   throw new TypeError(`getFourPillars expects 2 or 4 arguments, received ${args.length}`);
 }
+
+const western = WesternZodiacCalculator.getInstance?.() ?? WesternZodiacCalculator;
+
+/**
+ * Compute the Western horoscope (Sun, Moon, Ascendant, Midheaven) using UTC inputs.
+ * Accepts positional arguments:
+ *   (yearUtc, monthUtc, dayUtc, hourUtc, minuteUtc, secondUtc = 0, latitudeDeg, longitudeDeg)
+ * or an options object:
+ *   ({ yearUtc, monthUtc, dayUtc, hourUtc, minuteUtc, secondUtc?, latitudeDeg, longitudeDeg })
+ */
+export function calculateHoroscopeUtc(...args) {
+  if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+    const o = args[0];
+    return western.calculateHoroscopeUtc(
+      o.yearUtc, o.monthUtc, o.dayUtc,
+      o.hourUtc, o.minuteUtc, o.secondUtc ?? 0.0,
+      o.latitudeDeg ?? o.latitude, o.longitudeDeg ?? o.longitude
+    );
+  }
+  return western.calculateHoroscopeUtc(...args);
+}
+
+/**
+ * Compute the Western horoscope (Sun, Moon, Ascendant, Midheaven) using local civil time and UTC offset.
+ * Accepts positional arguments:
+ *   (year, month, day, hour, minute, second = 0, utcOffsetHours, latitudeDeg, longitudeDeg)
+ * or an options object:
+ *   ({ year, month, day, hour, minute, second?, utcOffsetHours, latitude, longitude })
+ */
+export function calculateHoroscope(...args) {
+  if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+    const o = args[0];
+    return western.calculateHoroscope(
+      o.year, o.month, o.day,
+      o.hour, o.minute, o.second ?? 0.0,
+      o.utcOffsetHours,
+      o.latitudeDeg ?? o.latitude, o.longitudeDeg ?? o.longitude
+    );
+  }
+  return western.calculateHoroscope(...args);
+}
+
