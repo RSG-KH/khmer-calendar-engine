@@ -8,7 +8,9 @@ import kotlin.js.JsExport
 @JsExport
 data class GregorianDate(val year: Int, val month: Int, val day: Int) {
     init {
-        listOf(year, month, day).forEach(::requireInteger)
+        requireInteger(year)
+        requireInteger(month)
+        requireInteger(day)
         require(year in 1..9999) { "Gregorian year must be 1..9999" }
         require(month in 1..12) { "Gregorian month must be 1..12" }
         require(day in 1..daysInMonth(year, month)) { "Invalid Gregorian day" }
@@ -39,6 +41,7 @@ data class GregorianDate(val year: Int, val month: Int, val day: Int) {
 internal fun floorMod(value: Int, modulus: Int): Int = (value % modulus + modulus) % modulus
 // Kotlin vals are immutable on the JVM; JavaScript also needs runtime protection for exported values.
 internal expect fun freezeValue(value: Any)
+internal expect fun requireInteger(value: Int)
 internal fun isGregorianLeap(year: Int): Boolean = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)
 internal fun daysInMonth(year: Int, month: Int): Int = when (month) {
     2 -> if (isGregorianLeap(year)) 29 else 28

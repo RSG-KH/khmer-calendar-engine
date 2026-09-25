@@ -2,6 +2,21 @@
 
 All notable changes to the Khmer Calendar Engine. Versions are published as GitHub releases (see [docs/releasing.md](docs/releasing.md)); each heading links to its release.
 
+## [0.5.1] — 2026-09-25
+
+Maintenance release: Four Pillars day-hour synchronization, festival registry isolation, and JavaScript runtime validation hardening.
+
+### Fixed
+
+- Four Pillars day-hour alignment at 23:00 (`V05-001`): `ChineseZodiacCalculator.getFourPillars` now rolls both the day pillar and hour pillar forward at 23:00 (late Rat / *Zi* hour) to match the engine's documented convention, ensuring both pillars share the same effective day while retaining the civil date for year and month pillars.
+- Festival ID validation isolation (`V05-002`): `ChineseLunisolarEngine.FESTIVAL_IDS` now returns a defensive, frozen array copy to prevent external mutation from corrupting shared recurrence validation state. Added internal `isKnownFestivalId` helper.
+- JavaScript dynamic boundary input validation (`V05-003`): `requireInteger` now verifies JS primitive numeric type, finite integrality, and signed 32-bit `Int` range, rejecting `null`, non-numeric strings, booleans, arrays, and out-of-range integers ($2^{32}$) across exported Kotlin APIs and wrappers.
+- FestivalProfile metadata immutability (`V05-007`): Froze `FestivalProfile` enum instances in JavaScript to prevent external tampering of profile identifiers.
+
+### Added
+
+- Regression test suite `EngineV050AuditTest` covering late-Zi day/hour transitions across 1900–2100 boundaries, festival ID isolation, and explicit profile parity.
+
 ## [0.5.0] — 2026-09-23
 
 Astrological solar calendar, Four Pillars (BaZi) and clash branches.

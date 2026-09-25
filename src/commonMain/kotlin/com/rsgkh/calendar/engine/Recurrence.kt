@@ -46,7 +46,7 @@ class RecurrenceRule(
             "new_year_first", "new_year_middle", "new_year_last" ->
                 require(month == 1 && day == 1 && waxing && occurrence == 1) { "New Year stages do not take month/day parameters" }
             "chinese_festival" -> {
-                require(id in ChineseLunisolarEngine.FESTIVAL_IDS) { "Unknown Chinese festival ID: $id" }
+                require(ChineseLunisolarEngine.isKnownFestivalId(id)) { "Unknown Chinese festival ID: $id" }
                 require(month == 1 && day == 1 && waxing && occurrence == 1) { "Chinese festival rules do not take month/day parameters" }
             }
             else -> throw IllegalArgumentException("Unknown recurrence type: $type")

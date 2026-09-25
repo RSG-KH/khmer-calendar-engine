@@ -12,6 +12,10 @@ enum class FestivalProfile(val id: String) {
     CN_LUNAR_UTC7_SOLAR("cn-lunar-utc7-solar"),
     LOCAL_UTC7_MODEL("local-utc7-model");
 
+    init {
+        freezeValue(this)
+    }
+
     companion object {
         fun fromId(id: String): FestivalProfile = entries.firstOrNull { it.id == id }
             ?: throw IllegalArgumentException("Unknown profile: $id")
@@ -132,11 +136,20 @@ class ChineseLunisolarEngine(val profile: FestivalProfile = FestivalProfile.ARCH
         const val TABLE_BYTES = 603
         const val ALL_TABLE_BYTES = 1206
 
-        val FESTIVAL_IDS: Array<String> = arrayOf(
+        private val INTERNAL_FESTIVAL_IDS: Array<String> = arrayOf(
             "chinese_new_year_days", "chinese_new_year_eve", "chinese_kitchen_god_festival",
             "chinese_spirit_parade", "chinese_zongzi_festival", "chinese_ghost_festival",
             "chinese_mid_autumn_festival", "chinese_qingming_festival", "chinese_winter_solstice"
         )
+
+        val FESTIVAL_IDS: Array<String>
+            get() {
+                val copy = INTERNAL_FESTIVAL_IDS.copyOf()
+                freezeValue(copy)
+                return copy
+            }
+
+        internal fun isKnownFestivalId(id: String): Boolean = id in INTERNAL_FESTIVAL_IDS
 
         private fun decodeHex(hex: String): ByteArray {
             require(hex.length == TABLE_BYTES * 2 && hex.all { it in '0'..'9' || it in 'a'..'f' }) { "Invalid calendar table" }

@@ -49,7 +49,7 @@ class NewYearCelebration internal constructor(
 /** Pure calendar API. Dates are civil dates; year labels do not express arrival instants. */
 @JsExport
 class KhmerCalendarEngine {
-    val version: String get() = "0.5.0"
+    val version: String get() = "0.5.1"
     val minYear: Int get() = MIN_YEAR
     val maxYear: Int get() = MAX_YEAR
 
@@ -77,10 +77,6 @@ class KhmerCalendarEngine {
 
 internal const val MIN_YEAR = 1800
 internal const val MAX_YEAR = 2200
-internal fun requireInteger(value: Int) {
-    // JS callers can pass fractional numbers despite a TypeScript `number` declaration.
-    require(value.toDouble().isFinite() && value.toDouble() % 1.0 == 0.0) { "Expected an integer" }
-}
 internal fun requireCalendarYear(year: Int) {
     requireInteger(year)
     require(year in MIN_YEAR..MAX_YEAR) { "Supported calendar years: 1800..2200" }

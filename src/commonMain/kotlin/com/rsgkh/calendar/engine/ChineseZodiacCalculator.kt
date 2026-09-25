@@ -68,7 +68,9 @@ object ChineseZodiacCalculator {
      * term is ~5.4M, far below Int overflow).
      */
     fun gregorianToJdn(year: Int, month: Int, day: Int): Int {
-        listOf(year, month, day).forEach(::requireInteger)
+        requireInteger(year)
+        requireInteger(month)
+        requireInteger(day)
         require(year in 1..9999) { "Gregorian year must be 1..9999" }
         require(month in 1..12) { "Gregorian month must be 1..12" }
         require(day in 1..daysInMonth(year, month)) { "Invalid Gregorian day" }
@@ -85,7 +87,8 @@ object ChineseZodiacCalculator {
 
     /** Civil day of the month (UTC+8) on which a sectional solar term (Jie) begins. */
     fun getSectionalTermDay(year: Int, month: Int): Int {
-        listOf(year, month).forEach(::requireInteger)
+        requireInteger(year)
+        requireInteger(month)
         require(year in MIN_SOLAR_YEAR..MAX_SOLAR_YEAR) { "Year must be $MIN_SOLAR_YEAR..$MAX_SOLAR_YEAR" }
         require(month in 1..12) { "Month must be 1..12" }
         val i = (year - MIN_SOLAR_YEAR) * 3
@@ -96,7 +99,9 @@ object ChineseZodiacCalculator {
     }
 
     private fun requireSolarDate(year: Int, month: Int, day: Int) {
-        listOf(year, month, day).forEach(::requireInteger)
+        requireInteger(year)
+        requireInteger(month)
+        requireInteger(day)
         require(year in MIN_SOLAR_YEAR..MAX_SOLAR_YEAR) { "Year must be $MIN_SOLAR_YEAR..$MAX_SOLAR_YEAR" }
         require(month in 1..12) { "Month must be 1..12" }
         require(day in 1..daysInMonth(year, month)) { "Invalid Gregorian day" }
@@ -163,6 +168,10 @@ object ChineseZodiacCalculator {
      */
     fun getDayPillar(year: Int, month: Int, day: Int): GanzhiPillar {
         val jdn = gregorianToJdn(year, month, day)
+        return dayPillarFromJdn(jdn)
+    }
+
+    private fun dayPillarFromJdn(jdn: Int): GanzhiPillar {
         val cycle = floorMod(jdn + 49, 60)
         val stem = HeavenlyStem.fromIndex(cycle % 10)
         val branch = EarthlyBranch.fromIndex(cycle % 12)
@@ -208,8 +217,7 @@ object ChineseZodiacCalculator {
         require(hourOfDay in 0..23) { "Hour must be 0..23, received $hourOfDay" }
         val jdn = gregorianToJdn(year, month, day)
         val effectiveJdn = if (hourOfDay == 23) jdn + 1 else jdn
-        val dayCycle = floorMod(effectiveJdn + 49, 60)
-        val effectiveDayStem = HeavenlyStem.fromIndex(dayCycle % 10)
+        val effectiveDayStem = dayPillarFromJdn(effectiveJdn).stem
         return getHourPillar(effectiveDayStem, hourOfDay)
     }
 
@@ -219,15 +227,20 @@ object ChineseZodiacCalculator {
     /**
      * Constructs the complete Four Pillars of Destiny (BaZi) and the four
      * clash branches. Requires 1900..2100 (the solar term table's range).
+     * Both day and hour roll forward at 23:00 (late Rat hour);
+     * year and month retain the civil calendar date.
      */
     fun getFourPillars(year: Int, month: Int, day: Int, hourOfDay: Int): FourPillars {
         requireInteger(hourOfDay)
         require(hourOfDay in 0..23) { "Hour must be 0..23, received $hourOfDay" }
+        val jdn = gregorianToJdn(year, month, day)
+        val effectiveJdn = if (hourOfDay == 23) jdn + 1 else jdn
+        val effectiveDayPillar = dayPillarFromJdn(effectiveJdn)
         return FourPillars(
             getYearPillar(year, month, day),
             getMonthPillar(year, month, day),
-            getDayPillar(year, month, day),
-            getHourPillarForDate(year, month, day, hourOfDay)
+            effectiveDayPillar,
+            getHourPillar(effectiveDayPillar.stem, hourOfDay)
         )
     }
 

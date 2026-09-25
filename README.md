@@ -4,7 +4,7 @@ One Kotlin implementation, compiled into an **Android-compatible JVM library** a
 
 ## Status
 
-**0.5.0 — Astrological solar calendar (BaZi).** Packages can be built locally; the [release workflow](docs/releasing.md) publishes tested packages to GitHub when a matching version tag is pushed. It does not publish to Maven Central or npm. Release history: [CHANGELOG.md](CHANGELOG.md).
+**0.5.1 — Astrological solar calendar (BaZi) maintenance.** Packages can be built locally; the [release workflow](docs/releasing.md) publishes tested packages to GitHub when a matching version tag is pushed. It does not publish to Maven Central or npm. Release history: [CHANGELOG.md](CHANGELOG.md).
 
 Implemented:
 
@@ -26,7 +26,7 @@ The engine calculates dates and one clearly-labeled estimate. The separate manag
 Add the built Maven repository (`build/repository`), or the extracted `repository/` directory from a published Maven ZIP, to your project's repositories, then depend on:
 
 ```kotlin
-implementation("com.rsgkh:khmer-calendar-engine-jvm:0.5.0")
+implementation("com.rsgkh:khmer-calendar-engine-jvm:0.5.1")
 ```
 
 ```kotlin
@@ -79,10 +79,10 @@ Outputs:
 
 | Artifact | Location |
 | --- | --- |
-| JVM library | `build/libs/khmer-calendar-engine-jvm-0.5.0.jar` |
+| JVM library | `build/libs/khmer-calendar-engine-jvm-0.5.1.jar` |
 | Maven repository, including dependency metadata | `build/repository` |
 | ESM package and TypeScript declarations | `build/npm` |
-| Installable npm tarball | `build/khmer-calendar-engine-0.5.0.tgz` |
+| Installable npm tarball | `build/khmer-calendar-engine-0.5.1.tgz` |
 
 JDK 25 runs the build; the JVM artifact still targets Java 11 bytecode. Use Maven metadata to obtain its Kotlin standard-library dependency. The JavaScript package includes its compiled runtime; consumers do not need Kotlin or Java. Both artifacts include license notices.
 
